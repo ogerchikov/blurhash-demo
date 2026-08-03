@@ -1,1 +1,15 @@
 
+body {
+  font-family: sans-serif;
+  margin: 40px;
+}
+
+#container {
+  width: 600px;
+}
+
+canvas,
+img {
+  width: 100%;
+  display: block;
+}
