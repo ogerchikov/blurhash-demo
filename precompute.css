@@ -1,0 +1,113 @@
+:root {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --line: #d7e0ea;
+  --ink: #132134;
+  --muted: #4f647d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 0% 0%, #e8f1ff 0%, var(--bg) 45%);
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Lucida Sans", "Segoe UI", sans-serif;
+}
+
+.tool-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.card {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 14px;
+}
+
+.card h2 {
+  margin: 0 0 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #eef3ff 100%);
+  color: var(--ink);
+  font-weight: 600;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  padding: 10px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+  background: #fbfdff;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+#resultSummary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+#resultSummary th,
+#resultSummary td {
+  border: 1px solid var(--line);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+#resultSummary th {
+  background: #eef3ff;
+}

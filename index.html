@@ -1,14 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>BlurHash Demo</title>
-  style.css
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlurHash vs ThumbHash vs LQIP vs Color vs Shimmer</title>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <h1>BlurHash Demo</h1>
+  <main class="app-shell">
+    <header class="hero">
+      <h1>BlurHash vs ThumbHash vs LQIP vs Color vs Shimmer</h1>
+      <p>Same source image, synchronized playback, side-by-side metrics.</p>
+      <p><a class="utility-link" href="./precompute.html">Open Browser Precompute Tool</a></p>
+      <p><a class="utility-link" href="./comparison-table.html">Open Comparison Table Page</a></p>
+    </header>
 
-  <div id="container"></div>
+    <section class="controls" aria-label="Comparison Controls">
+      <label>
+        Swap Delay
+        <input id="delayInput" type="range" min="0" max="3000" step="100" value="1200" />
+        <span id="delayValue">1200 ms</span>
+      </label>
 
-  app.jsscript>
+      <label>
+        Decode Height
+        <select id="decodeHeightSelect">
+          <option value="24">24 px</option>
+          <option value="32" selected>32 px</option>
+          <option value="48">48 px</option>
+          <option value="64">64 px</option>
+        </select>
+      </label>
+
+      <button id="replayButton" type="button">Replay Comparison</button>
+    </section>
+
+    <section class="comparison-grid" aria-label="BlurHash, ThumbHash, LQIP, color, and shimmer comparison">
+      <article class="tech-card tech-card--blurhash">
+        <h2>BlurHash</h2>
+        <div id="blurhashViewport" class="viewport"></div>
+        <p id="blurhashStatus" class="status">idle</p>
+        <dl class="metrics">
+          <div><dt>Payload</dt><dd id="blurhashPayload">-</dd></div>
+          <div><dt>Decode</dt><dd id="blurhashDecodeMs">-</dd></div>
+          <div><dt>First Paint</dt><dd id="blurhashFirstPaintMs">-</dd></div>
+          <div><dt>Block Est</dt><dd id="blurhashBlockMs">-</dd></div>
+          <div><dt>Similarity</dt><dd id="blurhashSimilarity">-</dd></div>
+          <div><dt>Shown At</dt><dd id="blurhashShownMs">-</dd></div>
+        </dl>
+      </article>
+
+      <article class="tech-card tech-card--thumbhash">
+        <h2>ThumbHash</h2>
+        <div id="thumbhashViewport" class="viewport"></div>
+        <p id="thumbhashStatus" class="status">idle</p>
+        <dl class="metrics">
+          <div><dt>Payload</dt><dd id="thumbhashPayload">-</dd></div>
+          <div><dt>Decode</dt><dd id="thumbhashDecodeMs">-</dd></div>
+          <div><dt>First Paint</dt><dd id="thumbhashFirstPaintMs">-</dd></div>
+          <div><dt>Block Est</dt><dd id="thumbhashBlockMs">-</dd></div>
+          <div><dt>Similarity</dt><dd id="thumbhashSimilarity">-</dd></div>
+          <div><dt>Shown At</dt><dd id="thumbhashShownMs">-</dd></div>
+        </dl>
+      </article>
+
+      <article class="tech-card tech-card--lqip">
+        <h2>Blur-up LQIP</h2>
+        <div id="lqipViewport" class="viewport"></div>
+        <p id="lqipStatus" class="status">idle</p>
+        <dl class="metrics">
+          <div><dt>Payload</dt><dd id="lqipPayload">-</dd></div>
+          <div><dt>Decode</dt><dd id="lqipDecodeMs">-</dd></div>
+          <div><dt>First Paint</dt><dd id="lqipFirstPaintMs">-</dd></div>
+          <div><dt>Block Est</dt><dd id="lqipBlockMs">-</dd></div>
+          <div><dt>Similarity</dt><dd id="lqipSimilarity">-</dd></div>
+          <div><dt>Shown At</dt><dd id="lqipShownMs">-</dd></div>
+        </dl>
+      </article>
+
+      <article class="tech-card tech-card--color">
+        <h2>Color Placeholder</h2>
+        <div id="colorViewport" class="viewport"></div>
+        <p id="colorStatus" class="status">idle</p>
+        <dl class="metrics">
+          <div><dt>Payload</dt><dd id="colorPayload">-</dd></div>
+          <div><dt>Decode</dt><dd id="colorDecodeMs">-</dd></div>
+          <div><dt>First Paint</dt><dd id="colorFirstPaintMs">-</dd></div>
+          <div><dt>Block Est</dt><dd id="colorBlockMs">-</dd></div>
+          <div><dt>Similarity</dt><dd id="colorSimilarity">-</dd></div>
+          <div><dt>Shown At</dt><dd id="colorShownMs">-</dd></div>
+        </dl>
+      </article>
+
+      <article class="tech-card tech-card--shimmer">
+        <h2>Shimmer Placeholder</h2>
+        <div id="shimmerViewport" class="viewport"></div>
+        <p id="shimmerStatus" class="status">idle</p>
+        <dl class="metrics">
+          <div><dt>Payload</dt><dd id="shimmerPayload">-</dd></div>
+          <div><dt>Decode</dt><dd id="shimmerDecodeMs">-</dd></div>
+          <div><dt>First Paint</dt><dd id="shimmerFirstPaintMs">-</dd></div>
+          <div><dt>Block Est</dt><dd id="shimmerBlockMs">-</dd></div>
+          <div><dt>Similarity</dt><dd id="shimmerSimilarity">-</dd></div>
+          <div><dt>Shown At</dt><dd id="shimmerShownMs">-</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="all-images" aria-label="Per-image placeholder rows">
+      <h2>Per-Image Placeholder Rows</h2>
+      <p id="allImagesStatus" class="status">Loading images...</p>
+      <div class="table-scroll index-rows-scroll">
+        <table class="preview-table index-rows-table">
+          <thead>
+            <tr>
+              <th scope="col">Image</th>
+              <th scope="col">Original</th>
+              <th scope="col">BlurHash</th>
+              <th scope="col">ThumbHash</th>
+              <th scope="col">LQIP</th>
+              <th scope="col">Color</th>
+              <th scope="col">Shimmer</th>
+              <th scope="col">First Paint</th>
+              <th scope="col">Block Est</th>
+              <th scope="col">Similarity</th>
+            </tr>
+          </thead>
+          <tbody id="allImagesRowsBody">
+            <tr>
+              <td colspan="10" class="table-empty">Loading rows...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

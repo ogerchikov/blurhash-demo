@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placeholder Comparison Table</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <h1>Placeholder Comparison Table</h1>
+      <p>Original image plus BlurHash, ThumbHash, Blur-up LQIP, color, and shimmer previews.</p>
+      <p><a class="utility-link" href="./index.html">Back to Main Comparison</a></p>
+    </header>
+
+    <section class="table-shell" aria-label="Image placeholder comparison table">
+      <div class="table-scroll">
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th scope="col">Image</th>
+              <th scope="col">Original</th>
+              <th scope="col">BlurHash</th>
+              <th scope="col">ThumbHash</th>
+              <th scope="col">Blur-up LQIP</th>
+              <th scope="col">Color</th>
+              <th scope="col">Shimmer</th>
+              <th scope="col">Payload</th>
+            </tr>
+          </thead>
+          <tbody id="previewTableBody">
+            <tr>
+              <td colspan="8" class="table-empty">Loading photos.json...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./comparison-table.js"></script>
+</body>
+</html>

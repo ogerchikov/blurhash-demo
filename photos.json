@@ -1,1 +1,78 @@
-
+{
+  "generatedAt": "2026-08-06T03:44:47.176Z",
+  "generatedBy": "browser-precompute",
+  "images": [
+    {
+      "id": "beach",
+      "src": "./images/beach.png",
+      "width": 1536,
+      "height": 1024,
+      "blurhash": "LJIhjc2yZ|ai0I$+nOtS+j,WOFs,",
+      "thumbhashBase64": "pNcNXZBoeIeQl4eIiJd1Z5RwNwiX",
+      "lqip": {
+        "mimeType": "image/jpeg",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAVACADASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAMEBQECBv/EACIQAAICAAUFAQAAAAAAAAAAAAECABEDBBIhMQUTFEFRof/EABYBAQEBAAAAAAAAAAAAAAAAAAQDBf/EAB4RAAIBBAMBAAAAAAAAAAAAAAABAgMEESEUQUJR/9oADAMBAAIRAxEAPwBHgXxDwaaj+GS0ySn1JCdMDblaH0xnKj9M+NGT8lcjpkmYd3AB9liDKrM51GOpSRZ325nVr07LIxOJhqT8rmMwcuhxNXbVUHC1cLVuZdDadtrZlCBelQKjHcqFI5O+8IQkm0tDIpZNQdR3jLoUIQh8lWf/2Q=="
+      },
+      "color": {
+        "r": 129,
+        "g": 151,
+        "b": 155,
+        "hex": "#81979b"
+      },
+      "shimmer": {
+        "mimeType": "image/svg+xml",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2021%22%20preserveAspectRatio%3D%22none%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientUnits%3D%22userSpaceOnUse%22%20x1%3D%22-64%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%220%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2381979b%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2244%25%22%20stop-color%3D%22%238b9fa3%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%2395a8ab%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2256%25%22%20stop-color%3D%22%238b9fa3%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2381979b%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x1%22%20values%3D%22-64%3B64%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x2%22%20values%3D%220%3B128%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2221%22%20fill%3D%22url(%23g)%22%20%2F%3E%0A%3C%2Fsvg%3E"
+      },
+      "bytes": {
+        "blurhashChars": 28,
+        "thumbhashBytes": 21,
+        "thumbhashBase64Chars": 28,
+        "lqipBytes": 901,
+        "lqipDataUrlChars": 1227,
+        "colorHexChars": 7,
+        "shimmerBytes": 703,
+        "shimmerDataUrlChars": 1263
+      }
+    },
+    {
+      "id": "mountains",
+      "src": "./images/mountains.webp",
+      "width": 750,
+      "height": 509,
+      "blurhash": "LDALLd4TjERjysjYRPof00%gaekC",
+      "thumbhashBase64": "WbcNDYJzd4d9h3eQh4eWiYaAiAm4",
+      "lqip": {
+        "mimeType": "image/jpeg",
+        "width": 32,
+        "height": 22,
+        "dataUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAWACADASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAQCAwEFBv/EACIQAAICAgEEAwEAAAAAAAAAAAECAAMEEVEhMUFhBRJSkf/EABcBAAMBAAAAAAAAAAAAAAAAAAABAwT/xAAXEQEBAQEAAAAAAAAAAAAAAAAAAREh/9oADAMBAAIRAxEAPwDVVUb8RyvH34la301LtnBPA6mNVfIYgq+5fR/J7yus3QMX1MHF9RrGzsW5Rtwh11BMcoSrJUmlg4B0dRaMcImuTLQo5P8AIQiUqWwvaQfPsoJNTMrcg6hCKiP/2Q=="
+      },
+      "color": {
+        "r": 75,
+        "g": 111,
+        "b": 117,
+        "hex": "#4b6f75"
+      },
+      "shimmer": {
+        "mimeType": "image/svg+xml",
+        "width": 32,
+        "height": 22,
+        "dataUrl": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2022%22%20preserveAspectRatio%3D%22none%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientUnits%3D%22userSpaceOnUse%22%20x1%3D%22-64%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%220%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234b6f75%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2244%25%22%20stop-color%3D%22%23597b80%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%2368868b%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2256%25%22%20stop-color%3D%22%23597b80%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%234b6f75%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x1%22%20values%3D%22-64%3B64%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x2%22%20values%3D%220%3B128%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2222%22%20fill%3D%22url(%23g)%22%20%2F%3E%0A%3C%2Fsvg%3E"
+      },
+      "bytes": {
+        "blurhashChars": 28,
+        "thumbhashBytes": 21,
+        "thumbhashBase64Chars": 28,
+        "lqipBytes": 871,
+        "lqipDataUrlChars": 1187,
+        "colorHexChars": 7,
+        "shimmerBytes": 703,
+        "shimmerDataUrlChars": 1263
+      }
+    }
+  ]
+}

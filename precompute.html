@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Precompute Placeholders</title>
+  <link rel="stylesheet" href="./precompute.css" />
+</head>
+<body>
+  <main class="tool-shell">
+    <header>
+      <h1>Browser Precompute Tool</h1>
+      <p>Scans ./images, computes BlurHash + ThumbHash + LQIP + Color + Shimmer, and exports photos.json.</p>
+      <p><a href="./index.html">Back to comparison page</a></p>
+    </header>
+
+    <section class="card">
+      <h2>1) Discover Files</h2>
+      <p>Try auto-scanning the ./images folder. If your dev server does not expose directory listings, paste file names manually.</p>
+      <div class="actions">
+        <button id="scanButton" type="button">Scan ./images</button>
+      </div>
+      <label for="fileListInput">Image file names (one per line)</label>
+      <textarea id="fileListInput" rows="8">beach.png</textarea>
+      <p class="hint">Supported: .png, .jpg, .jpeg, .webp, .avif</p>
+      <p id="scanStatus" class="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>2) Generate Manifest</h2>
+      <p class="hint">ThumbHash input is automatically downscaled to <=100px on the longest edge before encoding.</p>
+      <div class="actions">
+        <button id="generateButton" type="button">Generate photos.json</button>
+      </div>
+      <p id="generateStatus" class="status"></p>
+      <div id="resultSummary"></div>
+    </section>
+
+    <section class="card">
+      <h2>3) Export</h2>
+      <div class="actions">
+        <button id="downloadButton" type="button" disabled>Download photos.json</button>
+        <button id="copyButton" type="button" disabled>Copy JSON</button>
+      </div>
+      <textarea id="outputJson" rows="18" readonly></textarea>
+    </section>
+  </main>
+
+  <script type="module" src="./precompute-browser.js"></script>
+</body>
+</html>

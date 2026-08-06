@@ -1,0 +1,14 @@
+{
+  "name": "blurhash-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "precompute": "node ./scripts/precompute-placeholders.mjs"
+  },
+  "dependencies": {
+    "blurhash": "^2.0.5",
+    "sharp": "^0.34.3",
+    "thumbhash": "^0.1.1"
+  }
+}
