@@ -32,30 +32,6 @@ function makeCanvasFromRGBA(rgba, width, height) {
   return canvas;
 }
 
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error(`Failed to load image ${src}`));
-    image.src = src;
-  });
-}
-
-function imageToRgba(image, maxDimension = 24) {
-  const largest = Math.max(image.naturalWidth, image.naturalHeight);
-  const scale = largest > maxDimension ? maxDimension / largest : 1;
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-  context.drawImage(image, 0, 0, width, height);
-
-  return context.getImageData(0, 0, width, height).data;
-}
-
 function componentToHex(value) {
   return Math.max(0, Math.min(255, value)).toString(16).padStart(2, "0");
 }
@@ -84,31 +60,6 @@ function mixWithWhite(color, amount) {
     g: Math.round(color.g + (255 - color.g) * t),
     b: Math.round(color.b + (255 - color.b) * t),
   };
-}
-
-function computeAverageColor(rgba) {
-  let rSum = 0;
-  let gSum = 0;
-  let bSum = 0;
-  let alphaSum = 0;
-
-  for (let i = 0; i < rgba.length; i += 4) {
-    const alpha = rgba[i + 3] / 255;
-    rSum += rgba[i] * alpha;
-    gSum += rgba[i + 1] * alpha;
-    bSum += rgba[i + 2] * alpha;
-    alphaSum += alpha;
-  }
-
-  if (alphaSum === 0) {
-    return "#d9e0eb";
-  }
-
-  return rgbToHex(
-    Math.round(rSum / alphaSum),
-    Math.round(gSum / alphaSum),
-    Math.round(bSum / alphaSum)
-  );
 }
 
 function decodeSizeForRecord(record) {
@@ -189,82 +140,56 @@ function createLqipNode(record) {
   return viewport;
 }
 
-function createColorNode(record) {
+function createAvifNode(record) {
   const viewport = createViewportNode();
-  const colorHex = record?.color?.hex || "#d9e0eb";
 
-  const swatch = document.createElement("div");
-  swatch.className = "color-preview";
-  swatch.style.backgroundColor = colorHex;
-  viewport.appendChild(swatch);
-
-  if (!record?.color?.hex) {
-    loadImage(record.src)
-      .then((image) => {
-        const rgba = imageToRgba(image, 24);
-        swatch.style.backgroundColor = computeAverageColor(rgba);
-      })
-      .catch(() => {
-        swatch.style.backgroundColor = "#d9e0eb";
-      });
+  if (!record?.avif?.dataUrl) {
+    viewport.classList.add("table-viewport--empty");
+    viewport.textContent = "No avif";
+    return viewport;
   }
+
+  const image = new Image();
+  image.loading = "lazy";
+  image.className = "lqip-preview";
+  image.src = record.avif.dataUrl;
+  image.alt = `${record.id || "image"} avif`;
+  viewport.appendChild(image);
 
   return viewport;
 }
 
-function makeShimmerDataUrl(width, height, baseHex, animate = false) {
-  const safeWidth = Math.max(1, Math.round(width));
-  const safeHeight = Math.max(1, Math.round(height));
-  const sweep = safeWidth * 2;
-  const base = hexToRgb(baseHex);
-  const edge = mixWithWhite(base, 0.08);
-  const highlight = mixWithWhite(base, 0.16);
-  const edgeHex = rgbToHex(edge.r, edge.g, edge.b);
-  const highlightHex = rgbToHex(highlight.r, highlight.g, highlight.b);
-  const animation = animate
-    ? `
-      <animate attributeName="x1" values="-${sweep};${sweep}" dur="1.8s" repeatCount="indefinite" />
-      <animate attributeName="x2" values="0;${sweep * 2}" dur="1.8s" repeatCount="indefinite" />`
-    : "";
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeWidth} ${safeHeight}" preserveAspectRatio="none">
-  <defs>
-    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="-${sweep}" y1="0" x2="0" y2="0">
-      <stop offset="0%" stop-color="${baseHex}" />
-      <stop offset="44%" stop-color="${edgeHex}" />
-      <stop offset="50%" stop-color="${highlightHex}" />
-      <stop offset="56%" stop-color="${edgeHex}" />
-      <stop offset="100%" stop-color="${baseHex}" />
-      ${animation}
-    </linearGradient>
-  </defs>
-  <rect width="${safeWidth}" height="${safeHeight}" fill="url(#g)" />
-</svg>`;
+function createColorNode(record) {
+  if (!record?.color?.hex) {
+    const viewport = createViewportNode();
+    viewport.classList.add("table-viewport--empty");
+    viewport.textContent = "No color";
+    return viewport;
+  }
 
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.trim())}`;
+  const viewport = createViewportNode();
+  const swatch = document.createElement("div");
+  swatch.className = "color-preview";
+  swatch.style.backgroundColor = record.color.hex;
+  viewport.appendChild(swatch);
+  return viewport;
 }
 
 function createShimmerNode(record) {
+  if (!record?.shimmer?.dataUrl) {
+    const viewport = createViewportNode();
+    viewport.classList.add("table-viewport--empty");
+    viewport.textContent = "No shimmer";
+    return viewport;
+  }
+
   const viewport = createViewportNode();
   const image = new Image();
   image.loading = "lazy";
   image.className = "shimmer-preview";
-
-  if (record?.shimmer?.dataUrl) {
-    image.src = record.shimmer.dataUrl;
-    image.alt = `${record.id || "image"} shimmer`;
-    viewport.appendChild(image);
-    return viewport;
-  }
-
-  const ratio = (Number(record?.width) || 3) / (Number(record?.height) || 2);
-  const shimmerHeight = 36;
-  const shimmerWidth = Math.max(1, Math.round(shimmerHeight * ratio));
-  const baseHex = record?.color?.hex || "#d9e0eb";
-  image.src = makeShimmerDataUrl(shimmerWidth, shimmerHeight, baseHex);
+  image.src = record.shimmer.dataUrl;
   image.alt = `${record.id || "image"} shimmer`;
   viewport.appendChild(image);
-
   return viewport;
 }
 
@@ -286,6 +211,12 @@ function createPayloadText(record) {
     lines.push(`LQIP: ${bytes.lqipBytes} bytes`);
   } else if (record?.lqip?.dataUrl) {
     lines.push(`LQIP url: ${record.lqip.dataUrl.length} chars`);
+  }
+
+  if (typeof bytes.avifBytes === "number") {
+    lines.push(`AVIF: ${bytes.avifBytes} bytes`);
+  } else if (record?.avif?.dataUrl) {
+    lines.push(`AVIF url: ${record.avif.dataUrl.length} chars`);
   }
 
   if (typeof bytes.colorHexChars === "number" && record?.color?.hex) {
@@ -331,6 +262,9 @@ function buildRow(record) {
   const lqipCell = document.createElement("td");
   lqipCell.appendChild(createLqipNode(record));
 
+  const avifCell = document.createElement("td");
+  avifCell.appendChild(createAvifNode(record));
+
   const colorCell = document.createElement("td");
   colorCell.appendChild(createColorNode(record));
 
@@ -346,6 +280,7 @@ function buildRow(record) {
   row.appendChild(blurhashCell);
   row.appendChild(thumbhashCell);
   row.appendChild(lqipCell);
+  row.appendChild(avifCell);
   row.appendChild(colorCell);
   row.appendChild(shimmerCell);
   row.appendChild(payloadCell);
@@ -368,7 +303,7 @@ function renderEmpty(message) {
   tableBody.innerHTML = "";
   const row = document.createElement("tr");
   const cell = document.createElement("td");
-  cell.colSpan = 8;
+  cell.colSpan = 9;
   cell.className = "table-empty";
   cell.textContent = message;
   row.appendChild(cell);

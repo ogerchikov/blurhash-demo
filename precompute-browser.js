@@ -4,6 +4,7 @@ import { rgbaToThumbHash } from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
 const SUPPORTED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]);
 const LQIP_MAX_DIMENSION = 32;
 const LQIP_QUALITY = 0.45;
+const INLINE_AVIF_QUALITY = 0.45;
 
 const scanButton = document.getElementById("scanButton");
 const generateButton = document.getElementById("generateButton");
@@ -172,6 +173,7 @@ function makeSummaryTable(images) {
         <td>${item.bytes.blurhashChars}</td>
         <td>${item.bytes.thumbhashBytes}</td>
         <td>${item.bytes.lqipBytes}</td>
+        <td>${item.bytes.avifBytes}</td>
         <td>${item.color.hex}</td>
         <td>${item.bytes.shimmerBytes}</td>
       </tr>`;
@@ -186,6 +188,7 @@ function makeSummaryTable(images) {
         <th>BlurHash chars</th>
         <th>ThumbHash bytes</th>
         <th>LQIP bytes</th>
+        <th>AVIF bytes</th>
         <th>Color</th>
         <th>Shimmer bytes</th>
       </tr>
@@ -268,6 +271,45 @@ function makeLqipDataUrl(image, maxDimension = LQIP_MAX_DIMENSION, quality = LQI
   };
 }
 
+function makeInlineAvifDataUrl(image, width, height, quality = INLINE_AVIF_QUALITY) {
+  const safeWidth = Math.max(1, Math.round(width));
+  const safeHeight = Math.max(1, Math.round(height));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = safeWidth;
+  canvas.height = safeHeight;
+
+  const context = canvas.getContext("2d");
+  context.drawImage(image, 0, 0, safeWidth, safeHeight);
+
+  const avifDataUrl = canvas.toDataURL("image/avif", quality);
+  if (avifDataUrl.startsWith("data:image/avif")) {
+    return {
+      mimeType: "image/avif",
+      width: safeWidth,
+      height: safeHeight,
+      dataUrl: avifDataUrl,
+    };
+  }
+
+  const webpDataUrl = canvas.toDataURL("image/webp", quality);
+  if (webpDataUrl.startsWith("data:image/webp")) {
+    return {
+      mimeType: "image/webp",
+      width: safeWidth,
+      height: safeHeight,
+      dataUrl: webpDataUrl,
+    };
+  }
+
+  return {
+    mimeType: "image/jpeg",
+    width: safeWidth,
+    height: safeHeight,
+    dataUrl: canvas.toDataURL("image/jpeg", Math.max(quality, 0.45)),
+  };
+}
+
 async function computePlaceholdersForFile(fileName) {
   const src = `./images/${fileName}`;
   const image = await loadImage(src);
@@ -280,7 +322,9 @@ async function computePlaceholdersForFile(fileName) {
   const thumbhashBytes = rgbaToThumbHash(thumbInput.width, thumbInput.height, thumbInput.rgba);
   const thumbhashBase64 = byteArrayToBase64(thumbhashBytes);
   const lqip = makeLqipDataUrl(image);
+  const avif = makeInlineAvifDataUrl(image, lqip.width, lqip.height);
   const lqipBytes = dataUrlPayloadBytes(lqip.dataUrl);
+  const avifBytes = dataUrlPayloadBytes(avif.dataUrl);
   const avgColor = computeAverageColor(thumbInput.rgba);
   const colorHex = rgbToHex(avgColor.r, avgColor.g, avgColor.b);
   const shimmer = makeShimmerDataUrl(lqip.width, lqip.height, colorHex);
@@ -298,6 +342,12 @@ async function computePlaceholdersForFile(fileName) {
       width: lqip.width,
       height: lqip.height,
       dataUrl: lqip.dataUrl,
+    },
+    avif: {
+      mimeType: avif.mimeType,
+      width: avif.width,
+      height: avif.height,
+      dataUrl: avif.dataUrl,
     },
     color: {
       r: avgColor.r,
@@ -317,6 +367,8 @@ async function computePlaceholdersForFile(fileName) {
       thumbhashBase64Chars: thumbhashBase64.length,
       lqipBytes,
       lqipDataUrlChars: lqip.dataUrl.length,
+      avifBytes,
+      avifDataUrlChars: avif.dataUrl.length,
       colorHexChars: colorHex.length,
       shimmerBytes,
       shimmerDataUrlChars: shimmer.dataUrl.length,

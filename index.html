@@ -3,39 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BlurHash vs ThumbHash vs LQIP vs Color vs Shimmer</title>
+  <title>BlurHash vs ThumbHash vs LQIP vs AVIF vs Color vs Shimmer</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <main class="app-shell">
     <header class="hero">
-      <h1>BlurHash vs ThumbHash vs LQIP vs Color vs Shimmer</h1>
+      <h1>BlurHash vs ThumbHash vs LQIP vs AVIF vs Color vs Shimmer</h1>
       <p>Same source image, synchronized playback, side-by-side metrics.</p>
       <p><a class="utility-link" href="./precompute.html">Open Browser Precompute Tool</a></p>
       <p><a class="utility-link" href="./comparison-table.html">Open Comparison Table Page</a></p>
     </header>
 
-    <section class="controls" aria-label="Comparison Controls">
-      <label>
-        Swap Delay
-        <input id="delayInput" type="range" min="0" max="3000" step="100" value="1200" />
-        <span id="delayValue">1200 ms</span>
-      </label>
+    <div class="comparison-panel">
+      <section class="controls" aria-label="Comparison Controls">
+        <label>
+          Swap Delay
+          <input id="delayInput" type="range" min="0" max="3000" step="100" value="1200" />
+          <span id="delayValue">1200 ms</span>
+        </label>
 
-      <label>
-        Decode Height
-        <select id="decodeHeightSelect">
-          <option value="24">24 px</option>
-          <option value="32" selected>32 px</option>
-          <option value="48">48 px</option>
-          <option value="64">64 px</option>
-        </select>
-      </label>
+        <label>
+          Decode Height
+          <select id="decodeHeightSelect">
+            <option value="24">24 px</option>
+            <option value="32" selected>32 px</option>
+            <option value="48">48 px</option>
+            <option value="64">64 px</option>
+          </select>
+        </label>
 
-      <button id="replayButton" type="button">Replay Comparison</button>
-    </section>
+        <button id="replayButton" type="button">Replay Comparison</button>
+      </section>
 
-    <section class="comparison-grid" aria-label="BlurHash, ThumbHash, LQIP, color, and shimmer comparison">
+      <section class="comparison-grid" aria-label="BlurHash, ThumbHash, LQIP, AVIF, color, and shimmer comparison">
       <article class="tech-card tech-card--blurhash">
         <h2>BlurHash</h2>
         <div id="blurhashViewport" class="viewport"></div>
@@ -78,6 +79,20 @@
         </dl>
       </article>
 
+      <article class="tech-card tech-card--avif">
+        <h2>Inline AVIF</h2>
+        <div id="avifViewport" class="viewport"></div>
+        <p id="avifStatus" class="status">idle</p>
+        <dl class="metrics">
+          <div><dt>Payload</dt><dd id="avifPayload">-</dd></div>
+          <div><dt>Decode</dt><dd id="avifDecodeMs">-</dd></div>
+          <div><dt>First Paint</dt><dd id="avifFirstPaintMs">-</dd></div>
+          <div><dt>Block Est</dt><dd id="avifBlockMs">-</dd></div>
+          <div><dt>Similarity</dt><dd id="avifSimilarity">-</dd></div>
+          <div><dt>Shown At</dt><dd id="avifShownMs">-</dd></div>
+        </dl>
+      </article>
+
       <article class="tech-card tech-card--color">
         <h2>Color Placeholder</h2>
         <div id="colorViewport" class="viewport"></div>
@@ -105,7 +120,8 @@
           <div><dt>Shown At</dt><dd id="shimmerShownMs">-</dd></div>
         </dl>
       </article>
-    </section>
+      </section>
+    </div>
 
     <section class="all-images" aria-label="Per-image placeholder rows">
       <h2>Per-Image Placeholder Rows</h2>
@@ -119,6 +135,7 @@
               <th scope="col">BlurHash</th>
               <th scope="col">ThumbHash</th>
               <th scope="col">LQIP</th>
+              <th scope="col">AVIF</th>
               <th scope="col">Color</th>
               <th scope="col">Shimmer</th>
               <th scope="col">First Paint</th>
@@ -128,7 +145,7 @@
           </thead>
           <tbody id="allImagesRowsBody">
             <tr>
-              <td colspan="10" class="table-empty">Loading rows...</td>
+              <td colspan="11" class="table-empty">Loading rows...</td>
             </tr>
           </tbody>
         </table>

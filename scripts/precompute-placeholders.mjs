@@ -22,6 +22,7 @@ const SUPPORTED_EXTENSIONS = new Set([
 
 const LQIP_MAX_DIMENSION = 32;
 const LQIP_JPEG_QUALITY = 45;
+const INLINE_AVIF_QUALITY = 45;
 
 function isSupportedImage(fileName) {
   return SUPPORTED_EXTENSIONS.has(path.extname(fileName).toLowerCase());
@@ -120,6 +121,13 @@ async function computePlaceholdersForImage(fileName) {
   const lqipBase64 = lqip.data.toString("base64");
   const lqipDataUrl = `data:image/jpeg;base64,${lqipBase64}`;
 
+  const avif = await sharp(filePath)
+    .resize({ width: LQIP_MAX_DIMENSION, height: LQIP_MAX_DIMENSION, fit: "inside" })
+    .avif({ quality: INLINE_AVIF_QUALITY })
+    .toBuffer({ resolveWithObject: true });
+  const avifBase64 = avif.data.toString("base64");
+  const avifDataUrl = `data:image/avif;base64,${avifBase64}`;
+
   const colorSample = await sharp(filePath)
     .ensureAlpha()
     .resize({ width: 1, height: 1, fit: "fill" })
@@ -145,6 +153,12 @@ async function computePlaceholdersForImage(fileName) {
       height: lqip.info.height,
       dataUrl: lqipDataUrl,
     },
+    avif: {
+      mimeType: "image/avif",
+      width: avif.info.width,
+      height: avif.info.height,
+      dataUrl: avifDataUrl,
+    },
     color: {
       r: colorR,
       g: colorG,
@@ -163,6 +177,8 @@ async function computePlaceholdersForImage(fileName) {
       thumbhashBase64Chars: thumbhashBase64.length,
       lqipBytes: lqip.data.length,
       lqipDataUrlChars: lqipDataUrl.length,
+      avifBytes: avif.data.length,
+      avifDataUrlChars: avifDataUrl.length,
       colorHexChars: colorHex.length,
       shimmerBytes,
       shimmerDataUrlChars: shimmer.dataUrl.length,

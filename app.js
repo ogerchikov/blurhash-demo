@@ -1,13 +1,11 @@
 
 import { decode as decodeBlurHash } from "https://cdn.jsdelivr.net/npm/blurhash/+esm";
 import {
-  rgbaToThumbHash,
   thumbHashToRGBA,
 } from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
 
 const DEFAULT_IMAGE_SRC = "./images/beach.png";
 const PHOTOS_MANIFEST_SRC = "./photos.json";
-const FALLBACK_BLURHASH = "LEHV6nWB2yk8pyo0adR*.7kCMdnj";
 const SUPPORTED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]);
 
 const delayInput = document.getElementById("delayInput");
@@ -20,42 +18,50 @@ const allImagesRowsBody = document.getElementById("allImagesRowsBody");
 const blurhashViewport = document.getElementById("blurhashViewport");
 const thumbhashViewport = document.getElementById("thumbhashViewport");
 const lqipViewport = document.getElementById("lqipViewport");
+const avifViewport = document.getElementById("avifViewport");
 const colorViewport = document.getElementById("colorViewport");
 const shimmerViewport = document.getElementById("shimmerViewport");
 const blurhashStatus = document.getElementById("blurhashStatus");
 const thumbhashStatus = document.getElementById("thumbhashStatus");
 const lqipStatus = document.getElementById("lqipStatus");
+const avifStatus = document.getElementById("avifStatus");
 const colorStatus = document.getElementById("colorStatus");
 const shimmerStatus = document.getElementById("shimmerStatus");
 
 const blurhashPayload = document.getElementById("blurhashPayload");
 const thumbhashPayload = document.getElementById("thumbhashPayload");
 const lqipPayload = document.getElementById("lqipPayload");
+const avifPayload = document.getElementById("avifPayload");
 const colorPayload = document.getElementById("colorPayload");
 const shimmerPayload = document.getElementById("shimmerPayload");
 const blurhashDecodeMs = document.getElementById("blurhashDecodeMs");
 const thumbhashDecodeMs = document.getElementById("thumbhashDecodeMs");
 const lqipDecodeMs = document.getElementById("lqipDecodeMs");
+const avifDecodeMs = document.getElementById("avifDecodeMs");
 const colorDecodeMs = document.getElementById("colorDecodeMs");
 const shimmerDecodeMs = document.getElementById("shimmerDecodeMs");
 const blurhashFirstPaintMs = document.getElementById("blurhashFirstPaintMs");
 const thumbhashFirstPaintMs = document.getElementById("thumbhashFirstPaintMs");
 const lqipFirstPaintMs = document.getElementById("lqipFirstPaintMs");
+const avifFirstPaintMs = document.getElementById("avifFirstPaintMs");
 const colorFirstPaintMs = document.getElementById("colorFirstPaintMs");
 const shimmerFirstPaintMs = document.getElementById("shimmerFirstPaintMs");
 const blurhashBlockMs = document.getElementById("blurhashBlockMs");
 const thumbhashBlockMs = document.getElementById("thumbhashBlockMs");
 const lqipBlockMs = document.getElementById("lqipBlockMs");
+const avifBlockMs = document.getElementById("avifBlockMs");
 const colorBlockMs = document.getElementById("colorBlockMs");
 const shimmerBlockMs = document.getElementById("shimmerBlockMs");
 const blurhashSimilarity = document.getElementById("blurhashSimilarity");
 const thumbhashSimilarity = document.getElementById("thumbhashSimilarity");
 const lqipSimilarity = document.getElementById("lqipSimilarity");
+const avifSimilarity = document.getElementById("avifSimilarity");
 const colorSimilarity = document.getElementById("colorSimilarity");
 const shimmerSimilarity = document.getElementById("shimmerSimilarity");
 const blurhashShownMs = document.getElementById("blurhashShownMs");
 const thumbhashShownMs = document.getElementById("thumbhashShownMs");
 const lqipShownMs = document.getElementById("lqipShownMs");
+const avifShownMs = document.getElementById("avifShownMs");
 const colorShownMs = document.getElementById("colorShownMs");
 const shimmerShownMs = document.getElementById("shimmerShownMs");
 
@@ -65,10 +71,12 @@ const state = {
   manifestImages: [],
   currentImageSrc: DEFAULT_IMAGE_SRC,
   availableImageSrcs: [],
-  blurhashString: FALLBACK_BLURHASH,
+  blurhashString: null,
   thumbHashBytes: null,
   lqipDataUrl: null,
-  colorHex: "#b8c6d8",
+  avifDataUrl: null,
+  avifMimeType: "image/avif",
+  colorHex: null,
   shimmerDataUrl: null,
   prefersReducedMotion: false,
   aspectRatio: 3 / 2,
@@ -129,31 +137,6 @@ function mixWithWhite(color, amount) {
     r: Math.round(color.r + (255 - color.r) * t),
     g: Math.round(color.g + (255 - color.g) * t),
     b: Math.round(color.b + (255 - color.b) * t),
-  };
-}
-
-function computeAverageColor(rgba) {
-  let rSum = 0;
-  let gSum = 0;
-  let bSum = 0;
-  let alphaSum = 0;
-
-  for (let i = 0; i < rgba.length; i += 4) {
-    const alpha = rgba[i + 3] / 255;
-    rSum += rgba[i] * alpha;
-    gSum += rgba[i + 1] * alpha;
-    bSum += rgba[i + 2] * alpha;
-    alphaSum += alpha;
-  }
-
-  if (alphaSum === 0) {
-    return { r: 184, g: 198, b: 216 };
-  }
-
-  return {
-    r: Math.round(rSum / alphaSum),
-    g: Math.round(gSum / alphaSum),
-    b: Math.round(bSum / alphaSum),
   };
 }
 
@@ -229,6 +212,7 @@ function setViewportAspect(ratio) {
   blurhashViewport.style.aspectRatio = `${aspect}`;
   thumbhashViewport.style.aspectRatio = `${aspect}`;
   lqipViewport.style.aspectRatio = `${aspect}`;
+  avifViewport.style.aspectRatio = `${aspect}`;
   colorViewport.style.aspectRatio = `${aspect}`;
   shimmerViewport.style.aspectRatio = `${aspect}`;
 }
@@ -240,37 +224,6 @@ function loadImageElement(src) {
     img.onerror = () => reject(new Error(`Failed to load: ${src}`));
     img.src = src;
   });
-}
-
-function imageToRGBA(image, maxDimension = 100) {
-  const scale = maxDimension / Math.max(image.naturalWidth, image.naturalHeight);
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  context.drawImage(image, 0, 0, width, height);
-  const imageData = context.getImageData(0, 0, width, height);
-
-  return {
-    width,
-    height,
-    rgba: imageData.data,
-  };
-}
-
-function makeLqipDataUrl(image, width, height) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  context.drawImage(image, 0, 0, width, height);
-
-  return canvas.toDataURL("image/jpeg", 0.6);
 }
 
 function decodeHeightToSize(decodeHeight, ratio) {
@@ -399,7 +352,7 @@ function createImageRows(records, imageSrcs, selectedSrc, onSelect) {
     allImagesStatus.textContent = "No images found in ./images.";
     const emptyRow = document.createElement("tr");
     const emptyCell = document.createElement("td");
-    emptyCell.colSpan = 10;
+    emptyCell.colSpan = 11;
     emptyCell.className = "table-empty";
     emptyCell.textContent = "No rows available.";
     emptyRow.appendChild(emptyCell);
@@ -481,29 +434,45 @@ function createImageRows(records, imageSrcs, selectedSrc, onSelect) {
       lqipCell.appendChild(createMissingViewport("No lqip"));
     }
 
+    const avifCell = document.createElement("td");
+    if (record?.avif?.dataUrl) {
+      const viewport = createRowViewport();
+      const image = new Image();
+      image.loading = "lazy";
+      image.className = "lqip-preview";
+      image.src = record.avif.dataUrl;
+      image.alt = `${normalizedSrc} avif`;
+      viewport.appendChild(image);
+      avifCell.appendChild(viewport);
+    } else {
+      avifCell.appendChild(createMissingViewport("No avif"));
+    }
+
     const colorCell = document.createElement("td");
-    const colorViewport = createRowViewport();
-    const swatch = document.createElement("div");
-    swatch.className = "color-preview";
-    swatch.style.backgroundColor = record?.color?.hex || "#d9e0eb";
-    colorViewport.appendChild(swatch);
-    colorCell.appendChild(colorViewport);
+    if (record?.color?.hex) {
+      const colorViewport = createRowViewport();
+      const swatch = document.createElement("div");
+      swatch.className = "color-preview";
+      swatch.style.backgroundColor = record.color.hex;
+      colorViewport.appendChild(swatch);
+      colorCell.appendChild(colorViewport);
+    } else {
+      colorCell.appendChild(createMissingViewport("No color"));
+    }
 
     const shimmerCell = document.createElement("td");
-    const shimmerViewport = createRowViewport();
-    const shimmerImage = new Image();
-    shimmerImage.loading = "lazy";
-    shimmerImage.className = "shimmer-preview";
     if (record?.shimmer?.dataUrl) {
+      const shimmerViewport = createRowViewport();
+      const shimmerImage = new Image();
+      shimmerImage.loading = "lazy";
+      shimmerImage.className = "shimmer-preview";
       shimmerImage.src = record.shimmer.dataUrl;
+      shimmerImage.alt = `${normalizedSrc} shimmer`;
+      shimmerViewport.appendChild(shimmerImage);
+      shimmerCell.appendChild(shimmerViewport);
     } else {
-      const size = decodeSizeForRow(record);
-      const shimmerBase = record?.color?.hex || "#d9e0eb";
-      shimmerImage.src = makeShimmerDataUrl(size.width, size.height, shimmerBase, false);
+      shimmerCell.appendChild(createMissingViewport("No shimmer"));
     }
-    shimmerImage.alt = `${normalizedSrc} shimmer`;
-    shimmerViewport.appendChild(shimmerImage);
-    shimmerCell.appendChild(shimmerViewport);
 
     const firstPaintCell = createBenchCell();
     const blockCell = createBenchCell();
@@ -514,6 +483,7 @@ function createImageRows(records, imageSrcs, selectedSrc, onSelect) {
     row.appendChild(blurhashCell);
     row.appendChild(thumbhashCell);
     row.appendChild(lqipCell);
+    row.appendChild(avifCell);
     row.appendChild(colorCell);
     row.appendChild(shimmerCell);
     row.appendChild(firstPaintCell);
@@ -562,84 +532,91 @@ async function prepareComparisonForImage(imageSrc) {
   try {
     state.imageRecord = await loadManifestRecord(state.currentImageSrc);
   } catch (error) {
-    console.warn("photos.json load failed, using runtime fallback", error);
+    console.warn("photos.json load failed", error);
     state.imageRecord = null;
   }
 
   if (state.imageRecord?.blurhash) {
     state.blurhashString = state.imageRecord.blurhash;
   } else {
-    state.blurhashString = FALLBACK_BLURHASH;
+    state.blurhashString = null;
   }
 
   if (state.imageRecord?.thumbhashBase64) {
     state.thumbHashBytes = base64ToBytes(state.imageRecord.thumbhashBase64);
   } else {
-    const sourcePixels = imageToRGBA(state.sourceImage, 100);
-    state.thumbHashBytes = rgbaToThumbHash(
-      sourcePixels.width,
-      sourcePixels.height,
-      sourcePixels.rgba
-    );
+    state.thumbHashBytes = null;
   }
 
   if (state.imageRecord?.lqip?.dataUrl) {
     state.lqipDataUrl = state.imageRecord.lqip.dataUrl;
   } else {
-    const fallbackSize = decodeHeightToSize(Number(decodeHeightSelect.value), state.aspectRatio);
-    state.lqipDataUrl = makeLqipDataUrl(
-      state.sourceImage,
-      fallbackSize.width,
-      fallbackSize.height
-    );
+    state.lqipDataUrl = null;
+  }
+
+  if (state.imageRecord?.avif?.dataUrl) {
+    state.avifDataUrl = state.imageRecord.avif.dataUrl;
+    state.avifMimeType = state.imageRecord.avif.mimeType || "image/avif";
+  } else {
+    state.avifDataUrl = null;
+    state.avifMimeType = "image/avif";
   }
 
   if (state.imageRecord?.color?.hex) {
     state.colorHex = state.imageRecord.color.hex;
   } else {
-    const fallbackColorPixels = imageToRGBA(state.sourceImage, 32);
-    const avg = computeAverageColor(fallbackColorPixels.rgba);
-    state.colorHex = rgbToHex(avg.r, avg.g, avg.b);
+    state.colorHex = null;
   }
 
-  if (state.imageRecord?.shimmer?.dataUrl && !state.prefersReducedMotion) {
+  if (state.imageRecord?.shimmer?.dataUrl) {
     state.shimmerDataUrl = state.imageRecord.shimmer.dataUrl;
   } else {
-    const shimmerSize = decodeHeightToSize(Number(decodeHeightSelect.value), state.aspectRatio);
-    state.shimmerDataUrl = makeShimmerDataUrl(
-      shimmerSize.width,
-      shimmerSize.height,
-      state.colorHex,
-      !state.prefersReducedMotion
-    );
+    state.shimmerDataUrl = null;
   }
 
-  const thumbBase64 = btoa(String.fromCharCode(...state.thumbHashBytes)).replace(/=+$/, "");
-
-  blurhashPayload.textContent = `${state.blurhashString.length} chars`;
+  if (state.blurhashString) {
+    blurhashPayload.textContent = `${state.blurhashString.length} chars`;
+  } else {
+    blurhashPayload.textContent = "No blurhash in manifest";
+  }
 
   if (state.imageRecord?.bytes?.thumbhashBytes && state.imageRecord?.bytes?.thumbhashBase64Chars) {
     thumbhashPayload.textContent = `${state.imageRecord.bytes.thumbhashBytes} bytes / ${state.imageRecord.bytes.thumbhashBase64Chars} b64 chars`;
-  } else {
+  } else if (state.thumbHashBytes) {
+    const thumbBase64 = btoa(String.fromCharCode(...state.thumbHashBytes)).replace(/=+$/, "");
     thumbhashPayload.textContent = `${state.thumbHashBytes.length} bytes / ${thumbBase64.length} b64 chars`;
+  } else {
+    thumbhashPayload.textContent = "No thumbhash in manifest";
   }
 
   if (state.imageRecord?.bytes?.lqipBytes && state.imageRecord?.bytes?.lqipDataUrlChars) {
     lqipPayload.textContent = `${state.imageRecord.bytes.lqipBytes} bytes / ${state.imageRecord.bytes.lqipDataUrlChars} data-url chars`;
-  } else {
+  } else if (state.lqipDataUrl) {
     lqipPayload.textContent = `${state.lqipDataUrl.length} data-url chars`;
+  } else {
+    lqipPayload.textContent = "No lqip in manifest";
+  }
+
+  if (state.imageRecord?.bytes?.avifBytes && state.imageRecord?.bytes?.avifDataUrlChars) {
+    avifPayload.textContent = `${state.imageRecord.bytes.avifBytes} bytes / ${state.imageRecord.bytes.avifDataUrlChars} data-url chars`;
+  } else {
+    avifPayload.textContent = "No avif in manifest";
   }
 
   if (state.imageRecord?.bytes?.colorHexChars && state.imageRecord?.color?.hex) {
     colorPayload.textContent = `${state.imageRecord.bytes.colorHexChars} chars (${state.imageRecord.color.hex})`;
-  } else {
+  } else if (state.colorHex) {
     colorPayload.textContent = `${state.colorHex.length} chars (${state.colorHex})`;
+  } else {
+    colorPayload.textContent = "No color in manifest";
   }
 
   if (state.imageRecord?.bytes?.shimmerBytes && state.imageRecord?.bytes?.shimmerDataUrlChars) {
     shimmerPayload.textContent = `${state.imageRecord.bytes.shimmerBytes} bytes / ${state.imageRecord.bytes.shimmerDataUrlChars} data-url chars`;
-  } else {
+  } else if (state.shimmerDataUrl) {
     shimmerPayload.textContent = `${state.shimmerDataUrl.length} data-url chars`;
+  } else {
+    shimmerPayload.textContent = "No shimmer in manifest";
   }
 }
 
@@ -755,12 +732,14 @@ function createBenchCell() {
 }
 
 function formatBenchLines(values, formatter) {
+  const fmt = (value) => (typeof value === "number" ? formatter(value) : "n/a");
   return [
-    `BH ${formatter(values.blurhash)}`,
-    `TH ${formatter(values.thumbhash)}`,
-    `LQ ${formatter(values.lqip)}`,
-    `CL ${formatter(values.color)}`,
-    `SH ${formatter(values.shimmer)}`,
+    `BH ${fmt(values.blurhash)}`,
+    `TH ${fmt(values.thumbhash)}`,
+    `LQ ${fmt(values.lqip)}`,
+    `AV ${fmt(values.avif)}`,
+    `CL ${fmt(values.color)}`,
+    `SH ${fmt(values.shimmer)}`,
   ].join("\n");
 }
 
@@ -771,25 +750,28 @@ async function computeRowBenchmarks(src, record) {
 
   const result = {
     firstPaint: {
-      blurhash: 0,
-      thumbhash: 0,
-      lqip: 0,
-      color: 0,
-      shimmer: 0,
+      blurhash: null,
+      thumbhash: null,
+      lqip: null,
+      avif: null,
+      color: null,
+      shimmer: null,
     },
     block: {
-      blurhash: 0,
-      thumbhash: 0,
-      lqip: 0,
-      color: 0,
-      shimmer: 0,
+      blurhash: null,
+      thumbhash: null,
+      lqip: null,
+      avif: null,
+      color: null,
+      shimmer: null,
     },
     similarity: {
-      blurhash: 0,
-      thumbhash: 0,
-      lqip: 0,
-      color: 0,
-      shimmer: 0,
+      blurhash: null,
+      thumbhash: null,
+      lqip: null,
+      avif: null,
+      color: null,
+      shimmer: null,
     },
   };
 
@@ -832,9 +814,24 @@ async function computeRowBenchmarks(src, record) {
     }
   }
 
-  {
+  if (record?.avif?.dataUrl) {
+    const avifDataUrl = record.avif.dataUrl;
     const t0 = performance.now();
-    const colorHex = record?.color?.hex || "#d9e0eb";
+    const image = await decodeImageDataUrl(avifDataUrl);
+    const t1 = performance.now();
+    const duration = t1 - t0;
+    result.firstPaint.avif = duration;
+    result.block.avif = estimateBlockingMs(duration);
+    if (image) {
+      const sourcePixels = imageDataFromSourceAtSize(sourceImage, image.naturalWidth, image.naturalHeight);
+      const candidatePixels = imageDataFromImage(image, image.naturalWidth, image.naturalHeight);
+      result.similarity.avif = similarityPercent(sourcePixels, candidatePixels);
+    }
+  }
+
+  if (record?.color?.hex) {
+    const t0 = performance.now();
+    const colorHex = record.color.hex;
     const canvas = document.createElement("canvas");
     canvas.width = size.width;
     canvas.height = size.height;
@@ -850,9 +847,8 @@ async function computeRowBenchmarks(src, record) {
     result.similarity.color = similarityPercent(sourcePixels, candidatePixels);
   }
 
-  {
-    const shimmerDataUrl = record?.shimmer?.dataUrl
-      || makeShimmerDataUrl(size.width, size.height, record?.color?.hex || "#d9e0eb", false);
+  if (record?.shimmer?.dataUrl) {
+    const shimmerDataUrl = record.shimmer.dataUrl;
     const t0 = performance.now();
     const image = await decodeImageDataUrl(shimmerDataUrl);
     const t1 = performance.now();
@@ -898,193 +894,320 @@ async function runComparison() {
   const decodeHeight = Number(decodeHeightSelect.value);
   const decodeSize = decodeHeightToSize(decodeHeight, state.aspectRatio);
 
-  if (!state.imageRecord?.shimmer?.dataUrl) {
-    state.shimmerDataUrl = makeShimmerDataUrl(
-      decodeSize.width,
-      decodeSize.height,
-      state.colorHex,
-      !state.prefersReducedMotion
-    );
-  }
-
   clearViewport(blurhashViewport);
   clearViewport(thumbhashViewport);
   clearViewport(lqipViewport);
+  clearViewport(avifViewport);
   clearViewport(colorViewport);
   clearViewport(shimmerViewport);
 
   showStatus(blurhashStatus, "decoding placeholder...");
   showStatus(thumbhashStatus, "decoding placeholder...");
   showStatus(lqipStatus, "decoding placeholder...");
+  showStatus(avifStatus, "decoding placeholder...");
   showStatus(colorStatus, "decoding placeholder...");
   showStatus(shimmerStatus, "decoding placeholder...");
 
-  const blurDecodeStart = performance.now();
-  const blurCanvas = makeBlurhashCanvas(
-    state.blurhashString,
-    decodeSize.width,
-    decodeSize.height
-  );
-  const blurDecodeEnd = performance.now();
-  blurhashViewport.appendChild(blurCanvas);
-  const blurDecodeDuration = blurDecodeEnd - blurDecodeStart;
-  blurhashDecodeMs.textContent = formatMs(blurDecodeDuration);
-  blurhashFirstPaintMs.textContent = formatMs(performance.now() - start);
-  blurhashBlockMs.textContent = formatMs(estimateBlockingMs(blurDecodeDuration));
-  {
-    const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, blurCanvas.width, blurCanvas.height);
-    const candidatePixels = imageDataFromCanvas(blurCanvas);
-    blurhashSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+  let blurCanvas = null;
+  if (state.blurhashString) {
+    const blurDecodeStart = performance.now();
+    blurCanvas = makeBlurhashCanvas(
+      state.blurhashString,
+      decodeSize.width,
+      decodeSize.height
+    );
+    const blurDecodeEnd = performance.now();
+    blurhashViewport.appendChild(blurCanvas);
+    const blurDecodeDuration = blurDecodeEnd - blurDecodeStart;
+    blurhashDecodeMs.textContent = formatMs(blurDecodeDuration);
+    blurhashFirstPaintMs.textContent = formatMs(performance.now() - start);
+    blurhashBlockMs.textContent = formatMs(estimateBlockingMs(blurDecodeDuration));
+    {
+      const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, blurCanvas.width, blurCanvas.height);
+      const candidatePixels = imageDataFromCanvas(blurCanvas);
+      blurhashSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+    }
+    showStatus(blurhashStatus, "placeholder shown");
+  } else {
+    blurhashViewport.appendChild(createMissingViewport("No blurhash"));
+    blurhashDecodeMs.textContent = "-";
+    blurhashFirstPaintMs.textContent = "-";
+    blurhashBlockMs.textContent = "-";
+    blurhashSimilarity.textContent = "-";
+    blurhashShownMs.textContent = "-";
+    showStatus(blurhashStatus, "missing");
   }
-  showStatus(blurhashStatus, "placeholder shown");
 
-  const thumbDecodeStart = performance.now();
-  const thumbCanvas = makeThumbhashCanvas(state.thumbHashBytes);
-  const thumbDecodeEnd = performance.now();
-  thumbhashViewport.appendChild(thumbCanvas);
-  const thumbDecodeDuration = thumbDecodeEnd - thumbDecodeStart;
-  thumbhashDecodeMs.textContent = formatMs(thumbDecodeDuration);
-  thumbhashFirstPaintMs.textContent = formatMs(performance.now() - start);
-  thumbhashBlockMs.textContent = formatMs(estimateBlockingMs(thumbDecodeDuration));
-  {
-    const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, thumbCanvas.width, thumbCanvas.height);
-    const candidatePixels = imageDataFromCanvas(thumbCanvas);
-    thumbhashSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+  let thumbCanvas = null;
+  if (state.thumbHashBytes) {
+    const thumbDecodeStart = performance.now();
+    thumbCanvas = makeThumbhashCanvas(state.thumbHashBytes);
+    const thumbDecodeEnd = performance.now();
+    thumbhashViewport.appendChild(thumbCanvas);
+    const thumbDecodeDuration = thumbDecodeEnd - thumbDecodeStart;
+    thumbhashDecodeMs.textContent = formatMs(thumbDecodeDuration);
+    thumbhashFirstPaintMs.textContent = formatMs(performance.now() - start);
+    thumbhashBlockMs.textContent = formatMs(estimateBlockingMs(thumbDecodeDuration));
+    {
+      const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, thumbCanvas.width, thumbCanvas.height);
+      const candidatePixels = imageDataFromCanvas(thumbCanvas);
+      thumbhashSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+    }
+    showStatus(thumbhashStatus, "placeholder shown");
+  } else {
+    thumbhashViewport.appendChild(createMissingViewport("No thumbhash"));
+    thumbhashDecodeMs.textContent = "-";
+    thumbhashFirstPaintMs.textContent = "-";
+    thumbhashBlockMs.textContent = "-";
+    thumbhashSimilarity.textContent = "-";
+    thumbhashShownMs.textContent = "-";
+    showStatus(thumbhashStatus, "missing");
   }
-  showStatus(thumbhashStatus, "placeholder shown");
 
-  const lqipDecodeStart = performance.now();
-  const lqipPreview = new Image();
-  lqipPreview.className = "lqip-preview";
-  lqipPreview.src = state.lqipDataUrl;
+  let lqipPreview = null;
+  if (state.lqipDataUrl) {
+    const lqipDecodeStart = performance.now();
+    lqipPreview = new Image();
+    lqipPreview.className = "lqip-preview";
+    lqipPreview.src = state.lqipDataUrl;
+    try {
+      await lqipPreview.decode();
+    } catch {
+      lqipPreview = null;
+    }
+
+    if (lqipPreview) {
+      const lqipDecodeEnd = performance.now();
+      lqipViewport.appendChild(lqipPreview);
+      const lqipDecodeDuration = lqipDecodeEnd - lqipDecodeStart;
+      lqipDecodeMs.textContent = formatMs(lqipDecodeDuration);
+      lqipFirstPaintMs.textContent = formatMs(performance.now() - start);
+      lqipBlockMs.textContent = formatMs(estimateBlockingMs(lqipDecodeDuration));
+      {
+        const lqipWidth = Math.max(1, lqipPreview.naturalWidth || decodeSize.width);
+        const lqipHeight = Math.max(1, lqipPreview.naturalHeight || decodeSize.height);
+        const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, lqipWidth, lqipHeight);
+        const candidatePixels = imageDataFromImage(lqipPreview, lqipWidth, lqipHeight);
+        lqipSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+      }
+      showStatus(lqipStatus, "placeholder shown");
+    }
+  }
+
+  if (!lqipPreview) {
+    lqipViewport.appendChild(createMissingViewport("No lqip"));
+    lqipDecodeMs.textContent = "-";
+    lqipFirstPaintMs.textContent = "-";
+    lqipBlockMs.textContent = "-";
+    lqipSimilarity.textContent = "-";
+    lqipShownMs.textContent = "-";
+    showStatus(lqipStatus, state.lqipDataUrl ? "unsupported" : "missing");
+  }
+
+  let avifPreview = null;
+  if (state.avifDataUrl) {
+    const avifDecodeStart = performance.now();
+    avifPreview = new Image();
+    avifPreview.className = "lqip-preview";
+    avifPreview.src = state.avifDataUrl;
+    try {
+      await avifPreview.decode();
+    } catch {
+      avifPayload.textContent = "AVIF not supported by this browser";
+      avifDecodeMs.textContent = "-";
+      avifFirstPaintMs.textContent = "-";
+      avifBlockMs.textContent = "-";
+      avifSimilarity.textContent = "-";
+      avifShownMs.textContent = "-";
+      avifViewport.appendChild(createMissingViewport("No avif"));
+      showStatus(avifStatus, "unsupported");
+      avifPreview = null;
+    }
+
+    if (avifPreview) {
+      const avifDecodeEnd = performance.now();
+      avifViewport.appendChild(avifPreview);
+      avifPayload.textContent = `${state.avifDataUrl.length} data-url chars (${state.avifMimeType})`;
+      const avifDecodeDuration = avifDecodeEnd - avifDecodeStart;
+      avifDecodeMs.textContent = formatMs(avifDecodeDuration);
+      avifFirstPaintMs.textContent = formatMs(performance.now() - start);
+      avifBlockMs.textContent = formatMs(estimateBlockingMs(avifDecodeDuration));
+      {
+        const avifWidth = Math.max(1, avifPreview.naturalWidth || decodeSize.width);
+        const avifHeight = Math.max(1, avifPreview.naturalHeight || decodeSize.height);
+        const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, avifWidth, avifHeight);
+        const candidatePixels = imageDataFromImage(avifPreview, avifWidth, avifHeight);
+        avifSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+      }
+      showStatus(avifStatus, "placeholder shown");
+    }
+  } else {
+    avifPayload.textContent = "No avif in manifest";
+    avifDecodeMs.textContent = "-";
+    avifFirstPaintMs.textContent = "-";
+    avifBlockMs.textContent = "-";
+    avifSimilarity.textContent = "-";
+    avifShownMs.textContent = "-";
+    avifViewport.appendChild(createMissingViewport("No avif"));
+    showStatus(avifStatus, "missing");
+  }
+
+  let colorPreview = null;
+  if (state.colorHex) {
+    const colorDecodeStart = performance.now();
+    colorPreview = makeColorPlaceholderNode(state.colorHex);
+    const colorDecodeEnd = performance.now();
+    colorViewport.appendChild(colorPreview);
+    const colorDecodeDuration = colorDecodeEnd - colorDecodeStart;
+    colorDecodeMs.textContent = formatMs(colorDecodeDuration);
+    colorFirstPaintMs.textContent = formatMs(performance.now() - start);
+    colorBlockMs.textContent = formatMs(estimateBlockingMs(colorDecodeDuration));
+    {
+      const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, decodeSize.width, decodeSize.height);
+      const colorCanvas = document.createElement("canvas");
+      colorCanvas.width = decodeSize.width;
+      colorCanvas.height = decodeSize.height;
+      const colorContext = colorCanvas.getContext("2d");
+      colorContext.fillStyle = state.colorHex;
+      colorContext.fillRect(0, 0, colorCanvas.width, colorCanvas.height);
+      const candidatePixels = imageDataFromCanvas(colorCanvas);
+      colorSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+    }
+    showStatus(colorStatus, "placeholder shown");
+  } else {
+    colorViewport.appendChild(createMissingViewport("No color"));
+    colorDecodeMs.textContent = "-";
+    colorFirstPaintMs.textContent = "-";
+    colorBlockMs.textContent = "-";
+    colorSimilarity.textContent = "-";
+    colorShownMs.textContent = "-";
+    showStatus(colorStatus, "missing");
+  }
+
+  let shimmerPreview = null;
+  if (state.shimmerDataUrl) {
+    const shimmerDecodeStart = performance.now();
+    shimmerPreview = makeShimmerImageNode(state.shimmerDataUrl);
+    try {
+      await shimmerPreview.decode();
+    } catch {
+      shimmerPreview = null;
+    }
+
+    if (shimmerPreview) {
+      const shimmerDecodeEnd = performance.now();
+      shimmerViewport.appendChild(shimmerPreview);
+      const shimmerDecodeDuration = shimmerDecodeEnd - shimmerDecodeStart;
+      shimmerDecodeMs.textContent = formatMs(shimmerDecodeDuration);
+      shimmerFirstPaintMs.textContent = formatMs(performance.now() - start);
+      shimmerBlockMs.textContent = formatMs(estimateBlockingMs(shimmerDecodeDuration));
+      {
+        const shimmerWidth = Math.max(1, shimmerPreview.naturalWidth || decodeSize.width);
+        const shimmerHeight = Math.max(1, shimmerPreview.naturalHeight || decodeSize.height);
+        const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, shimmerWidth, shimmerHeight);
+        const candidatePixels = imageDataFromImage(shimmerPreview, shimmerWidth, shimmerHeight);
+        shimmerSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
+      }
+      showStatus(shimmerStatus, "placeholder shown");
+    }
+  }
+
+  if (!shimmerPreview) {
+    shimmerViewport.appendChild(createMissingViewport("No shimmer"));
+    shimmerDecodeMs.textContent = "-";
+    shimmerFirstPaintMs.textContent = "-";
+    shimmerBlockMs.textContent = "-";
+    shimmerSimilarity.textContent = "-";
+    shimmerShownMs.textContent = "-";
+    showStatus(shimmerStatus, state.shimmerDataUrl ? "unsupported" : "missing");
+  }
+
+  const blurLoaded = blurCanvas
+    ? new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        setTimeout(() => {
+          revealFullImage(blurCanvas, image, start, blurhashStatus, blurhashShownMs);
+          resolve();
+        }, swapDelayMs);
+      };
+      image.onerror = () => reject(new Error("BlurHash image load failed"));
+      image.src = state.currentImageSrc;
+    })
+    : Promise.resolve();
+
+  const thumbLoaded = thumbCanvas
+    ? new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        setTimeout(() => {
+          revealFullImage(thumbCanvas, image, start, thumbhashStatus, thumbhashShownMs);
+          resolve();
+        }, swapDelayMs);
+      };
+      image.onerror = () => reject(new Error("ThumbHash image load failed"));
+      image.src = state.currentImageSrc;
+    })
+    : Promise.resolve();
+
+  const lqipLoaded = lqipPreview
+    ? new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        setTimeout(() => {
+          revealFullImage(lqipPreview, image, start, lqipStatus, lqipShownMs);
+          resolve();
+        }, swapDelayMs);
+      };
+      image.onerror = () => reject(new Error("LQIP image load failed"));
+      image.src = state.currentImageSrc;
+    })
+    : Promise.resolve();
+
+  const avifLoaded = avifPreview
+    ? new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        setTimeout(() => {
+          revealFullImage(avifPreview, image, start, avifStatus, avifShownMs);
+          resolve();
+        }, swapDelayMs);
+      };
+      image.onerror = () => reject(new Error("AVIF image load failed"));
+      image.src = state.currentImageSrc;
+    })
+    : Promise.resolve();
+
+  const colorLoaded = colorPreview
+    ? new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        setTimeout(() => {
+          revealFullImage(colorPreview, image, start, colorStatus, colorShownMs);
+          resolve();
+        }, swapDelayMs);
+      };
+      image.onerror = () => reject(new Error("Color placeholder image load failed"));
+      image.src = state.currentImageSrc;
+    })
+    : Promise.resolve();
+
+  const shimmerLoaded = shimmerPreview
+    ? new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        setTimeout(() => {
+          revealFullImage(shimmerPreview, image, start, shimmerStatus, shimmerShownMs);
+          resolve();
+        }, swapDelayMs);
+      };
+      image.onerror = () => reject(new Error("Shimmer placeholder image load failed"));
+      image.src = state.currentImageSrc;
+    })
+    : Promise.resolve();
+
   try {
-    await lqipPreview.decode();
-  } catch {
-    // Ignore decode errors for metrics and rely on image load path later.
-  }
-  const lqipDecodeEnd = performance.now();
-  lqipViewport.appendChild(lqipPreview);
-  lqipPayload.textContent = `${state.lqipDataUrl.length} data-url chars`;
-  const lqipDecodeDuration = lqipDecodeEnd - lqipDecodeStart;
-  lqipDecodeMs.textContent = formatMs(lqipDecodeDuration);
-  lqipFirstPaintMs.textContent = formatMs(performance.now() - start);
-  lqipBlockMs.textContent = formatMs(estimateBlockingMs(lqipDecodeDuration));
-  {
-    const lqipWidth = Math.max(1, lqipPreview.naturalWidth || decodeSize.width);
-    const lqipHeight = Math.max(1, lqipPreview.naturalHeight || decodeSize.height);
-    const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, lqipWidth, lqipHeight);
-    const candidatePixels = imageDataFromImage(lqipPreview, lqipWidth, lqipHeight);
-    lqipSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
-  }
-  showStatus(lqipStatus, "placeholder shown");
-
-  const colorDecodeStart = performance.now();
-  const colorPreview = makeColorPlaceholderNode(state.colorHex);
-  const colorDecodeEnd = performance.now();
-  colorViewport.appendChild(colorPreview);
-  colorPayload.textContent = `${state.colorHex.length} chars (${state.colorHex})`;
-  const colorDecodeDuration = colorDecodeEnd - colorDecodeStart;
-  colorDecodeMs.textContent = formatMs(colorDecodeDuration);
-  colorFirstPaintMs.textContent = formatMs(performance.now() - start);
-  colorBlockMs.textContent = formatMs(estimateBlockingMs(colorDecodeDuration));
-  {
-    const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, decodeSize.width, decodeSize.height);
-    const colorCanvas = document.createElement("canvas");
-    colorCanvas.width = decodeSize.width;
-    colorCanvas.height = decodeSize.height;
-    const colorContext = colorCanvas.getContext("2d");
-    colorContext.fillStyle = state.colorHex;
-    colorContext.fillRect(0, 0, colorCanvas.width, colorCanvas.height);
-    const candidatePixels = imageDataFromCanvas(colorCanvas);
-    colorSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
-  }
-  showStatus(colorStatus, "placeholder shown");
-
-  const shimmerDecodeStart = performance.now();
-  const shimmerPreview = makeShimmerImageNode(state.shimmerDataUrl);
-  try {
-    await shimmerPreview.decode();
-  } catch {
-    // Ignore decode errors for metrics and rely on image load path later.
-  }
-  const shimmerDecodeEnd = performance.now();
-  shimmerViewport.appendChild(shimmerPreview);
-  shimmerPayload.textContent = `${state.shimmerDataUrl.length} data-url chars`;
-  const shimmerDecodeDuration = shimmerDecodeEnd - shimmerDecodeStart;
-  shimmerDecodeMs.textContent = formatMs(shimmerDecodeDuration);
-  shimmerFirstPaintMs.textContent = formatMs(performance.now() - start);
-  shimmerBlockMs.textContent = formatMs(estimateBlockingMs(shimmerDecodeDuration));
-  {
-    const shimmerWidth = Math.max(1, shimmerPreview.naturalWidth || decodeSize.width);
-    const shimmerHeight = Math.max(1, shimmerPreview.naturalHeight || decodeSize.height);
-    const sourcePixels = imageDataFromSourceAtSize(state.sourceImage, shimmerWidth, shimmerHeight);
-    const candidatePixels = imageDataFromImage(shimmerPreview, shimmerWidth, shimmerHeight);
-    shimmerSimilarity.textContent = formatPercent(similarityPercent(sourcePixels, candidatePixels));
-  }
-  showStatus(shimmerStatus, "placeholder shown");
-
-  const blurLoaded = new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      setTimeout(() => {
-        revealFullImage(blurCanvas, image, start, blurhashStatus, blurhashShownMs);
-        resolve();
-      }, swapDelayMs);
-    };
-    image.onerror = () => reject(new Error("BlurHash image load failed"));
-    image.src = state.currentImageSrc;
-  });
-
-  const thumbLoaded = new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      setTimeout(() => {
-        revealFullImage(thumbCanvas, image, start, thumbhashStatus, thumbhashShownMs);
-        resolve();
-      }, swapDelayMs);
-    };
-    image.onerror = () => reject(new Error("ThumbHash image load failed"));
-    image.src = state.currentImageSrc;
-  });
-
-  const lqipLoaded = new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      setTimeout(() => {
-        revealFullImage(lqipPreview, image, start, lqipStatus, lqipShownMs);
-        resolve();
-      }, swapDelayMs);
-    };
-    image.onerror = () => reject(new Error("LQIP image load failed"));
-    image.src = state.currentImageSrc;
-  });
-
-  const colorLoaded = new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      setTimeout(() => {
-        revealFullImage(colorPreview, image, start, colorStatus, colorShownMs);
-        resolve();
-      }, swapDelayMs);
-    };
-    image.onerror = () => reject(new Error("Color placeholder image load failed"));
-    image.src = state.currentImageSrc;
-  });
-
-  const shimmerLoaded = new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      setTimeout(() => {
-        revealFullImage(shimmerPreview, image, start, shimmerStatus, shimmerShownMs);
-        resolve();
-      }, swapDelayMs);
-    };
-    image.onerror = () => reject(new Error("Shimmer placeholder image load failed"));
-    image.src = state.currentImageSrc;
-  });
-
-  try {
-    await Promise.all([blurLoaded, thumbLoaded, lqipLoaded, colorLoaded, shimmerLoaded]);
+    await Promise.all([blurLoaded, thumbLoaded, lqipLoaded, avifLoaded, colorLoaded, shimmerLoaded]);
   } finally {
     replayButton.disabled = false;
   }
@@ -1125,6 +1248,7 @@ init().catch((error) => {
   showStatus(blurhashStatus, "error");
   showStatus(thumbhashStatus, "error");
   showStatus(lqipStatus, "error");
+  showStatus(avifStatus, "error");
   showStatus(colorStatus, "error");
   showStatus(shimmerStatus, "error");
   replayButton.disabled = true;

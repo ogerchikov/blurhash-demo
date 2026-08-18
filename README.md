@@ -5,6 +5,7 @@ A browser-based demo that compares multiple image placeholder techniques side by
 - BlurHash
 - ThumbHash
 - Blur-up LQIP
+- Inline AVIF
 - Color placeholder
 - Shimmer placeholder
 
@@ -27,11 +28,12 @@ The demo supports per-image comparison rows, runtime fallback generation, and ba
 
 ### Top Comparison Cards
 
-Five techniques are rendered with synchronized replay:
+Six techniques are rendered with synchronized replay:
 
 - BlurHash
 - ThumbHash
 - Blur-up LQIP
+- Inline AVIF
 - Color placeholder
 - Shimmer placeholder
 
@@ -52,6 +54,7 @@ The section below the cards renders one row per image found in `./images` (or fr
 - BlurHash preview
 - ThumbHash preview
 - LQIP preview
+- AVIF preview
 - Color preview
 - Shimmer preview
 - Benchmarks at a glance (first paint, block estimate, similarity)
@@ -106,6 +109,7 @@ Generated fields include:
 - `blurhash`
 - `thumbhashBase64`
 - `lqip` object (`mimeType`, `width`, `height`, `dataUrl`)
+- `avif` object (`mimeType`, `width`, `height`, `dataUrl`)
 - `color` object (`r`, `g`, `b`, `hex`)
 - `shimmer` object (`mimeType`, `width`, `height`, `dataUrl`)
 - `bytes` metrics
