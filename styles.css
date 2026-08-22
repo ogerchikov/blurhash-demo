@@ -353,8 +353,25 @@ body {
   margin: 0 0 8px;
 }
 
-.index-rows-scroll {
+.index-rows-scroller {
   margin-top: 8px;
+  max-height: min(44vh, 440px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgba(17, 24, 39, 0.02);
+}
+
+.index-rows-scroll {
+  margin-top: 0;
+  overflow: visible;
+}
+
+.index-rows-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .index-rows-table tbody tr {
