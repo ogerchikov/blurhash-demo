@@ -185,12 +185,27 @@ function makeShimmerImageNode(dataUrl) {
 }
 
 function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtNode) {
-  image.classList.add("full-image-enter");
-  placeholderNode.replaceWith(image);
+  const viewport = placeholderNode.parentElement;
+  if (!viewport) {
+    return;
+  }
 
+  image.classList.add("full-image-enter");
+  viewport.appendChild(image);
+  placeholderNode.classList.add("placeholder-exit");
+
+  image.getBoundingClientRect();
   requestAnimationFrame(() => {
     image.classList.add("is-visible");
+
+    if (state.prefersReducedMotion) {
+      placeholderNode.remove();
+    }
   });
+
+  if (!state.prefersReducedMotion) {
+    image.addEventListener("transitionend", () => placeholderNode.remove(), { once: true });
+  }
 
   const shownAt = performance.now() - startedAt;
   shownAtNode.textContent = formatMs(shownAt);
