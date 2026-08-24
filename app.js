@@ -11,6 +11,7 @@ const SUPPORTED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]
 const delayInput = document.getElementById("delayInput");
 const delayValue = document.getElementById("delayValue");
 const decodeHeightSelect = document.getElementById("decodeHeightSelect");
+const viewTransitionInput = document.getElementById("viewTransitionInput");
 const replayButton = document.getElementById("replayButton");
 const allImagesStatus = document.getElementById("allImagesStatus");
 const allImagesRowsBody = document.getElementById("allImagesRowsBody");
@@ -190,26 +191,38 @@ function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtN
     return;
   }
 
-  image.classList.add("full-image-enter");
-  viewport.appendChild(image);
-  placeholderNode.classList.add("placeholder-exit");
+  const updateShownStatus = () => {
+    const shownAt = performance.now() - startedAt;
+    shownAtNode.textContent = formatMs(shownAt);
+    showStatus(statusNode, "full image shown");
+  };
 
-  image.getBoundingClientRect();
-  requestAnimationFrame(() => {
-    image.classList.add("is-visible");
+  const replacePreview = () => {
+    placeholderNode.replaceWith(image);
+    updateShownStatus();
+  };
 
-    if (state.prefersReducedMotion) {
-      placeholderNode.remove();
-    }
-  });
+  if (
+    viewTransitionInput.checked
+    && !state.prefersReducedMotion
+    && typeof viewport.startViewTransition === "function"
+  ) {
+    viewport.startViewTransition(replacePreview);
+  } else if (state.prefersReducedMotion) {
+    replacePreview();
+  } else {
+    image.classList.add("full-image-enter");
+    viewport.appendChild(image);
+    placeholderNode.classList.add("placeholder-exit");
 
-  if (!state.prefersReducedMotion) {
+    image.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      image.classList.add("is-visible");
+    });
+
     image.addEventListener("transitionend", () => placeholderNode.remove(), { once: true });
+    updateShownStatus();
   }
-
-  const shownAt = performance.now() - startedAt;
-  shownAtNode.textContent = formatMs(shownAt);
-  showStatus(statusNode, "full image shown");
 }
 
 function updateDelayLabel() {
@@ -1231,6 +1244,17 @@ async function runComparison() {
 async function init() {
   updateDelayLabel();
   state.prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const supportsScopedViewTransitions = typeof blurhashViewport.startViewTransition === "function";
+
+  viewTransitionInput.checked = supportsScopedViewTransitions && !state.prefersReducedMotion;
+  viewTransitionInput.disabled = !supportsScopedViewTransitions || state.prefersReducedMotion;
+  if (!supportsScopedViewTransitions) {
+    viewTransitionInput.title = "Element-scoped View Transitions are not supported in this browser.";
+  } else if (state.prefersReducedMotion) {
+    viewTransitionInput.title = "Scoped View Transitions are disabled because reduced motion is preferred.";
+  } else {
+    viewTransitionInput.title = "Animate each preview swap with an element-scoped View Transition.";
+  }
 
   state.availableImageSrcs = await loadAvailableImages();
   let manifestImages = [];

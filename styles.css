@@ -62,7 +62,7 @@ body {
   background: var(--card);
   display: grid;
   gap: 12px;
-  grid-template-columns: 1fr 170px 170px;
+  grid-template-columns: 1fr 170px 220px 170px;
   align-items: center;
 }
 
@@ -80,6 +80,27 @@ body {
 #delayValue {
   color: var(--ink);
   font-size: 13px;
+}
+
+.controls .view-transition-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.view-transition-control:has(input:disabled) {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#viewTransitionInput {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--blurhash-accent);
 }
 
 #decodeHeightSelect,
@@ -174,6 +195,10 @@ body {
   display: block;
 }
 
+.viewport > * {
+  view-transition-name: preview-image;
+}
+
 .lqip-preview {
   filter: blur(10px);
   transform: scale(1.04);
@@ -212,10 +237,37 @@ body {
     transform 500ms ease-out;
 }
 
+@keyframes scoped-preview-exit {
+  to {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+@keyframes scoped-preview-enter {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+
+.viewport::view-transition-old(preview-image) {
+  animation: 500ms ease-out both scoped-preview-exit;
+}
+
+.viewport::view-transition-new(preview-image) {
+  animation: 500ms ease-out both scoped-preview-enter;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .full-image-enter,
   .placeholder-exit {
     transition: none;
+  }
+
+  .viewport::view-transition-old(preview-image),
+  .viewport::view-transition-new(preview-image) {
+    animation: none;
   }
 
   .lqip-preview {
