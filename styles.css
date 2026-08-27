@@ -45,6 +45,12 @@ body {
   font-weight: 600;
 }
 
+.utility-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
 .comparison-panel {
   position: sticky;
   top: 0;
@@ -458,4 +464,143 @@ body {
 
 .bench-cell {
   min-width: 118px;
+}
+
+.native-preview-controls {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.implementation-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.implementation-badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: var(--blurhash-accent);
+  font-size: 14px;
+}
+
+#reloadPreviewsButton {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ffffff 0%, #eef3ff 100%);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#reloadPreviewsButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.native-preview-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.native-preview-card,
+.native-preview-note {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.native-preview-card h2,
+.native-preview-note h2 {
+  margin: 0 0 10px;
+}
+
+.native-preview-card h2 {
+  color: var(--blurhash-accent);
+}
+
+.native-preview-card--unsupported h2 {
+  color: var(--muted);
+}
+
+.native-preview-frame,
+.unsupported-preview {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #d9e0eb;
+}
+
+.native-preview-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.unsupported-preview {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.native-preview-details {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.native-preview-details div {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 8px;
+  font-size: 13px;
+}
+
+.native-preview-details dt {
+  color: var(--muted);
+}
+
+.native-preview-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.native-preview-note {
+  margin-top: 18px;
+}
+
+.native-preview-note p {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .native-preview-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .native-preview-grid {
+    grid-template-columns: 1fr;
+  }
 }

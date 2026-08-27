@@ -9,7 +9,8 @@ A browser-based demo that compares multiple image placeholder techniques side by
 - Color placeholder
 - Shimmer placeholder
 
-The demo supports per-image comparison rows, runtime fallback generation, and basic benchmark metrics for each technique.
+The demo supports per-image comparison rows, runtime fallback generation, basic benchmark metrics,
+and a separate demo of the proposed native image-preview API.
 
 ## Project Structure
 
@@ -18,6 +19,9 @@ The demo supports per-image comparison rows, runtime fallback generation, and ba
 - `styles.css`: Shared styles for cards, tables, placeholders, and transitions.
 - `comparison-table.html`: Dedicated table page for comparing original and placeholders.
 - `comparison-table.js`: Data loading and placeholder rendering for the comparison table page.
+- `native-image-preview.html`: Native `previewsrc` / `HTMLImageElement.previewSrc` API demo.
+- `native-image-preview.js`: Demo setup, implementation status, and final-image reload behavior.
+- `image-preview-polyfill.js`: Fallback implementation loaded only when the native API is unavailable.
 - `precompute.html`: Browser-only precompute tool page.
 - `precompute-browser.js`: Computes placeholder data in-browser and exports `photos.json`.
 - `photos.json`: Precomputed manifest consumed by the app.
@@ -92,6 +96,19 @@ python -m http.server 8080
 ```
 
 Then navigate to the local URL shown by your server.
+
+### Native Image Preview API Demo
+
+Open `native-image-preview.html` to compare the supported preview resource forms:
+
+- An external standard image URL supplied with the `previewsrc` attribute
+- An inline JPEG data URL supplied through the `HTMLImageElement.previewSrc` property
+
+The page detects `HTMLImageElement.prototype.previewSrc` before its image markup is parsed. Browsers
+with the API use their native implementation; other browsers load `image-preview-polyfill.js`.
+BlurHash and ThumbHash inputs are marked **Not supported** because they are encoded hashes rather
+than standard image resources. This initial API and polyfill demo intentionally excludes View
+Transition behavior.
 
 ## Precompute `photos.json`
 
