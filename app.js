@@ -144,20 +144,8 @@ function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtN
     && typeof viewport.startViewTransition === "function"
   ) {
     viewport.startViewTransition(replacePreview);
-  } else if (state.prefersReducedMotion) {
-    replacePreview();
   } else {
-    image.classList.add("full-image-enter");
-    viewport.appendChild(image);
-    placeholderNode.classList.add("placeholder-exit");
-
-    image.getBoundingClientRect();
-    requestAnimationFrame(() => {
-      image.classList.add("is-visible");
-    });
-
-    image.addEventListener("transitionend", () => placeholderNode.remove(), { once: true });
-    updateShownStatus();
+    replacePreview();
   }
 }
 

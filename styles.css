@@ -205,27 +205,6 @@ body {
   inset: 0;
 }
 
-.full-image-enter {
-  opacity: 0;
-  transform: scale(1.02);
-  transition:
-    opacity 360ms ease-out,
-    transform 500ms ease-out;
-}
-
-.full-image-enter.is-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.placeholder-exit {
-  opacity: 0;
-  transform: scale(0.99);
-  transition:
-    opacity 360ms ease-out,
-    transform 500ms ease-out;
-}
-
 @keyframes scoped-preview-exit {
   to {
     opacity: 0;
@@ -249,11 +228,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .full-image-enter,
-  .placeholder-exit {
-    transition: none;
-  }
-
   .viewport::view-transition-old(preview-image),
   .viewport::view-transition-new(preview-image) {
     animation: none;

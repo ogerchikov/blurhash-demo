@@ -120,7 +120,7 @@ This writes `photos.json` from files in `images/`.
 
 - ThumbHash input is downscaled for encoding constraints.
 - Shimmer is intentionally subtle and slower to resemble production usage.
-- Reduced motion preference is respected for shimmer/fade behavior.
+- Reduced motion preference is respected for shimmer and scoped View Transitions.
 - Similarity metric is a simple RGB mean-absolute-difference based percentage.
 
 ## Troubleshooting
