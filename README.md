@@ -64,6 +64,7 @@ Rows are clickable: selecting a row updates the top comparison cards to that ima
 ## Data Source
 
 The app requires `photos.json` and uses its `images` records for image discovery and placeholder values.
+Both comparison pages validate the complete manifest at startup and report the exact invalid field before rendering data.
 
 ## Running The Demo
 

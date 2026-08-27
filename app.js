@@ -2,8 +2,7 @@ import { decode as decodeBlurHash } from "https://cdn.jsdelivr.net/npm/blurhash/
 import {
   thumbHashToRGBA,
 } from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
-
-const PHOTOS_MANIFEST_SRC = "./photos.json";
+import { loadPhotosManifest } from "./manifest.js";
 
 const delayInput = document.getElementById("delayInput");
 const delayValue = document.getElementById("delayValue");
@@ -210,16 +209,6 @@ function base64ToBytes(base64) {
 
 function normalizeSrc(src) {
   return src.replace(/^\.\//, "");
-}
-
-async function loadManifestImages() {
-  const response = await fetch(PHOTOS_MANIFEST_SRC, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch photos.json (${response.status})`);
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload?.images) ? payload.images : [];
 }
 
 function decodeSizeForRow(record) {
@@ -1118,13 +1107,9 @@ async function init() {
     viewTransitionInput.title = "Animate each preview swap with an element-scoped View Transition.";
   }
 
-  state.manifestImages = await loadManifestImages();
-  state.availableImageSrcs = state.manifestImages
-    .map((item) => item?.src)
-    .filter((src) => typeof src === "string" && src.trim().length > 0);
-  if (state.availableImageSrcs.length === 0) {
-    throw new Error("photos.json has no images with valid src values");
-  }
+  const manifest = await loadPhotosManifest();
+  state.manifestImages = manifest.images;
+  state.availableImageSrcs = manifest.images.map((item) => item.src);
   state.currentImageSrc = state.availableImageSrcs[0];
   await prepareComparisonForImage(state.currentImageSrc);
   createImageRows(state.manifestImages, state.availableImageSrcs, state.currentImageSrc, onSelectImageRow);

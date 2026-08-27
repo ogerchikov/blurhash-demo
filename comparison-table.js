@@ -1,7 +1,7 @@
 import { decode as decodeBlurHash } from "https://cdn.jsdelivr.net/npm/blurhash/+esm";
 import { thumbHashToRGBA } from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
+import { loadPhotosManifest } from "./manifest.js";
 
-const PHOTOS_MANIFEST_SRC = "./photos.json";
 const tableBody = document.getElementById("previewTableBody");
 
 function normalizeSrc(src) {
@@ -258,17 +258,6 @@ function buildRow(record) {
   return row;
 }
 
-async function loadManifest() {
-  const response = await fetch(PHOTOS_MANIFEST_SRC, { cache: "no-store" });
-
-  if (!response.ok) {
-    throw new Error(`Failed to load photos.json (${response.status})`);
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload?.images) ? payload.images : [];
-}
-
 function renderEmpty(message) {
   tableBody.innerHTML = "";
   const row = document.createElement("tr");
@@ -282,12 +271,7 @@ function renderEmpty(message) {
 
 async function init() {
   try {
-    const records = await loadManifest();
-
-    if (records.length === 0) {
-      renderEmpty("photos.json has no images[] records.");
-      return;
-    }
+    const { images: records } = await loadPhotosManifest();
 
     tableBody.innerHTML = "";
     records.forEach((record) => {
@@ -295,7 +279,7 @@ async function init() {
     });
   } catch (error) {
     console.error(error);
-    renderEmpty("Failed to load comparison data.");
+    renderEmpty(error.message);
   }
 }
 
