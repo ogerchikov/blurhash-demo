@@ -32,36 +32,6 @@ function makeCanvasFromRGBA(rgba, width, height) {
   return canvas;
 }
 
-function componentToHex(value) {
-  return Math.max(0, Math.min(255, value)).toString(16).padStart(2, "0");
-}
-
-function rgbToHex(r, g, b) {
-  return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
-}
-
-function hexToRgb(hex) {
-  const normalized = String(hex || "").trim().replace(/^#/, "");
-  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
-    return { r: 184, g: 198, b: 216 };
-  }
-
-  return {
-    r: Number.parseInt(normalized.slice(0, 2), 16),
-    g: Number.parseInt(normalized.slice(2, 4), 16),
-    b: Number.parseInt(normalized.slice(4, 6), 16),
-  };
-}
-
-function mixWithWhite(color, amount) {
-  const t = Math.max(0, Math.min(1, amount));
-  return {
-    r: Math.round(color.r + (255 - color.r) * t),
-    g: Math.round(color.g + (255 - color.g) * t),
-    b: Math.round(color.b + (255 - color.b) * t),
-  };
-}
-
 function decodeSizeForRecord(record) {
   const sourceWidth = Number(record?.width) || 3;
   const sourceHeight = Number(record?.height) || 2;

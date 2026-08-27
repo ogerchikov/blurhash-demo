@@ -9,7 +9,7 @@ A browser-based demo that compares multiple image placeholder techniques side by
 - Color placeholder
 - Shimmer placeholder
 
-The demo supports per-image comparison rows, runtime fallback generation, and basic benchmark metrics for each technique.
+The demo supports per-image comparison rows and basic benchmark metrics for each technique.
 
 ## Project Structure
 
@@ -61,18 +61,9 @@ The section below the cards renders one row per image found in `./images` (or fr
 
 Rows are clickable: selecting a row updates the top comparison cards to that image.
 
-## Data Source Priority
+## Data Source
 
-For image discovery, the app uses this order:
-
-1. `./images/` directory listing (when the server exposes it)
-2. `photos.json` image list
-3. Default fallback image (`./images/beach.png`)
-
-For per-image placeholder values:
-
-- Uses `photos.json` values when available
-- Falls back to runtime generation when values are missing
+The app requires `photos.json` and uses its `images` records for image discovery and placeholder values.
 
 ## Running The Demo
 
@@ -133,6 +124,5 @@ This writes `photos.json` from files in `images/`.
 
 ## Troubleshooting
 
-- If no images appear, verify your server root includes `images/` and `photos.json`.
-- If folder listing is disabled, ensure `photos.json` contains `images[].src` entries.
+- If no images appear, verify your server root includes `photos.json`, each record has a valid `src`, and the referenced image files exist.
 - If placeholders look stale after updates, regenerate `photos.json` and hard refresh.

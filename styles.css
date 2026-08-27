@@ -25,9 +25,6 @@ body {
 }
 
 .app-shell {
-  width: 100%;
-  max-width: 100vw;
-  margin: 0 auto;
   padding: 28px 18px 36px;
 }
 
@@ -138,7 +135,6 @@ body {
   padding: 14px;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .tech-card h2 {
@@ -207,13 +203,6 @@ body {
 .color-preview {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.shimmer-preview {
-  width: 100%;
-  height: 100%;
 }
 
 .full-image-enter {
@@ -328,7 +317,6 @@ body {
 }
 
 .table-scroll {
-  width: 100%;
   overflow-x: auto;
 }
 
@@ -432,11 +420,6 @@ body {
   border-radius: 12px;
   background: #fff;
   box-shadow: inset 0 1px 0 rgba(17, 24, 39, 0.02);
-}
-
-.index-rows-scroll {
-  margin-top: 0;
-  overflow: visible;
 }
 
 .index-rows-table thead th {
