@@ -614,20 +614,6 @@ body {
   object-fit: cover;
 }
 
-.native-preview-frame--native {
-  display: grid;
-  place-items: center;
-}
-
-.native-preview-frame--native > * {
-  grid-area: 1 / 1;
-}
-
-.unsupported-preview {
-  color: var(--muted);
-  font-size: 18px;
-}
-
 .native-preview-syntax {
   margin: 8px 0 0;
   color: var(--muted);

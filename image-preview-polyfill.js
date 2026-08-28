@@ -9,6 +9,7 @@
   }
 
   const states = new WeakMap();
+  let hashUtilsModule;
 
   function resolveUrl(value) {
     if (!value) {
@@ -24,6 +25,35 @@
 
   function cssUrl(url) {
     return `url(${JSON.stringify(url)})`;
+  }
+
+  function getBlurHashSize(image) {
+    const sourceWidth = Number(image.getAttribute("width")) || image.width || 32;
+    const sourceHeight = Number(image.getAttribute("height")) || image.height || 32;
+    const scale = Math.min(1, 32 / Math.max(sourceWidth, sourceHeight));
+    return {
+      width: Math.max(1, Math.round(sourceWidth * scale)),
+      height: Math.max(1, Math.round(sourceHeight * scale)),
+    };
+  }
+
+  async function getDisplayablePreviewUrl(previewUrl, image) {
+    if (previewUrl.startsWith("data:application/x-blurhash,")) {
+      const hash = decodeURIComponent(previewUrl.slice(previewUrl.indexOf(",") + 1));
+      const size = getBlurHashSize(image);
+      hashUtilsModule ||= import("./image-hash-utils.js");
+      const { blurhashToRasterDataUrl } = await hashUtilsModule;
+      return blurhashToRasterDataUrl(hash, size.width, size.height);
+    }
+
+    if (previewUrl.startsWith("data:application/x-thumbhash;base64,")) {
+      const encoded = previewUrl.slice(previewUrl.indexOf(",") + 1);
+      hashUtilsModule ||= import("./image-hash-utils.js");
+      const { base64ToBytes, thumbhashToRasterDataUrl } = await hashUtilsModule;
+      return thumbhashToRasterDataUrl(base64ToBytes(encoded));
+    }
+
+    return previewUrl;
   }
 
   function restoreContent(image, state) {
@@ -80,7 +110,7 @@
     return state;
   }
 
-  function updateImage(image) {
+  async function updateImage(image) {
     const state = getState(image);
     const version = state.version + 1;
     state.version = version;
@@ -90,6 +120,21 @@
     state.finalReady = image.complete && image.naturalWidth > 0;
 
     if (!previewUrl || state.finalReady) {
+      return;
+    }
+
+    let displayablePreviewUrl;
+    try {
+      displayablePreviewUrl = await getDisplayablePreviewUrl(previewUrl, image);
+    } catch {
+      return;
+    }
+
+    if (
+      state.version !== version
+      || state.finalReady
+      || !image.isConnected
+    ) {
       return;
     }
 
@@ -103,7 +148,7 @@
         && !state.finalReady
         && image.isConnected
       ) {
-        showPreview(image, state, preview.currentSrc || previewUrl);
+        showPreview(image, state, preview.currentSrc || displayablePreviewUrl);
       }
     }, { once: true });
 
@@ -113,7 +158,7 @@
       }
     }, { once: true });
 
-    preview.src = previewUrl;
+    preview.src = displayablePreviewUrl;
   }
 
   function upgrade(root) {

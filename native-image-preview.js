@@ -1,7 +1,7 @@
 import {
   base64ToBytes,
-  makeBlurhashCanvas,
-  makeThumbhashCanvas,
+  blurhashToRasterDataUrl,
+  thumbhashToRasterDataUrl,
 } from "./image-hash-utils.js";
 
 const implementationBadge = document.getElementById("implementationBadge");
@@ -15,11 +15,13 @@ const replayEntries = [
     image: externalImage,
     finalSrc: "./images/night-mood.jpg",
     status: document.querySelector('[data-status-for="externalPreviewImage"]'),
+    previewDescription: "Standard image preview",
   },
   {
     image: inlineImage,
     finalSrc: "./images/beach.png",
     status: document.querySelector('[data-status-for="inlinePreviewImage"]'),
+    previewDescription: "Inline raster preview",
   },
 ];
 let replayTimer;
@@ -29,9 +31,9 @@ function reloadFinalImages() {
   const cacheKey = `preview-demo=${Date.now()}`;
   const delay = Number(previewDelaySelect.value);
 
-  for (const { image, status } of replayEntries) {
+  for (const { image, status, previewDescription } of replayEntries) {
     image.removeAttribute("src");
-    status.textContent = `Preview shown for ${delay / 1000} seconds`;
+    status.textContent = `${previewDescription} shown for ${delay / 1000} seconds`;
   }
 
   replayTimer = setTimeout(() => {
@@ -44,8 +46,8 @@ function reloadFinalImages() {
   }, delay);
 }
 
-function addReplayEntry(image, finalSrc, status) {
-  replayEntries.push({ image, finalSrc, status });
+function addReplayEntry(image, finalSrc, status, previewDescription) {
+  replayEntries.push({ image, finalSrc, status, previewDescription });
   image.addEventListener("load", () => {
     status.textContent = "Final image loaded";
   });
@@ -74,48 +76,22 @@ function makeThumbHashDataUrl(hash) {
   return `data:application/x-thumbhash;base64,${hash}`;
 }
 
-function canDecodeNatively(dataUrl) {
-  if (window.imagePreviewDemo.implementation !== "Native API") {
-    return Promise.resolve(false);
-  }
-
-  return new Promise((resolve) => {
-    const probe = new Image();
-    const timeout = setTimeout(() => resolve(false), 1000);
-    probe.addEventListener("load", () => {
-      clearTimeout(timeout);
-      resolve(probe.naturalWidth > 0 && probe.naturalHeight > 0);
-    }, { once: true });
-    probe.addEventListener("error", () => {
-      clearTimeout(timeout);
-      resolve(false);
-    }, { once: true });
-    probe.src = dataUrl;
-  });
-}
-
-async function configureNativePreview({
+function configureEncodedHashPreview({
   imageId,
-  unsupportedId,
   statusId,
   previewUrl,
   finalSrc,
 }) {
   const image = document.getElementById(imageId);
-  const unsupported = document.getElementById(unsupportedId);
   const status = document.getElementById(statusId);
 
   image.setAttribute("previewsrc", previewUrl);
-  if (!await canDecodeNatively(previewUrl)) {
-    image.src = finalSrc;
-    status.textContent = "No native decoder is available for this media type.";
-    return;
-  }
-
-  unsupported.hidden = true;
-  image.hidden = false;
-  status.textContent = "Native decoder available; ready to replay";
-  addReplayEntry(image, finalSrc, status);
+  addReplayEntry(
+    image,
+    finalSrc,
+    status,
+    `Encoded hash preview decoded by ${window.imagePreviewDemo.implementation}`,
+  );
 }
 
 try {
@@ -140,36 +116,40 @@ try {
 
   inlineImage.previewSrc = beach.lqip.dataUrl;
 
-  const blurHashCanvas = makeBlurhashCanvas(forest.blurhash, 32, 21);
   const blurHashJsImage = document.getElementById("blurHashJsPreview");
   const blurHashJsStatus = document.getElementById("blurHashJsStatus");
-  blurHashJsImage.previewSrc = blurHashCanvas.toDataURL("image/png");
-  addReplayEntry(blurHashJsImage, forest.src, blurHashJsStatus);
+  blurHashJsImage.previewSrc = blurhashToRasterDataUrl(forest.blurhash, 32, 21);
+  addReplayEntry(
+    blurHashJsImage,
+    forest.src,
+    blurHashJsStatus,
+    "JavaScript-decoded raster preview",
+  );
   document.getElementById("blurHashValue").textContent = forest.blurhash;
 
-  const thumbHashCanvas = makeThumbhashCanvas(base64ToBytes(city.thumbhashBase64));
   const thumbHashJsImage = document.getElementById("thumbHashJsPreview");
   const thumbHashJsStatus = document.getElementById("thumbHashJsStatus");
-  thumbHashJsImage.previewSrc = thumbHashCanvas.toDataURL("image/png");
-  addReplayEntry(thumbHashJsImage, city.src, thumbHashJsStatus);
+  thumbHashJsImage.previewSrc = thumbhashToRasterDataUrl(base64ToBytes(city.thumbhashBase64));
+  addReplayEntry(
+    thumbHashJsImage,
+    city.src,
+    thumbHashJsStatus,
+    "JavaScript-decoded raster preview",
+  );
   document.getElementById("thumbHashValue").textContent = city.thumbhashBase64;
 
-  await Promise.all([
-    configureNativePreview({
-      imageId: "blurHashNativePreview",
-      unsupportedId: "blurHashUnsupported",
-      statusId: "blurHashNativeStatus",
-      previewUrl: makeBlurHashDataUrl(forest.blurhash),
-      finalSrc: forest.src,
-    }),
-    configureNativePreview({
-      imageId: "thumbHashNativePreview",
-      unsupportedId: "thumbHashUnsupported",
-      statusId: "thumbHashNativeStatus",
-      previewUrl: makeThumbHashDataUrl(city.thumbhashBase64),
-      finalSrc: city.src,
-    }),
-  ]);
+  configureEncodedHashPreview({
+    imageId: "blurHashNativePreview",
+    statusId: "blurHashNativeStatus",
+    previewUrl: makeBlurHashDataUrl(forest.blurhash),
+    finalSrc: forest.src,
+  });
+  configureEncodedHashPreview({
+    imageId: "thumbHashNativePreview",
+    statusId: "thumbHashNativeStatus",
+    previewUrl: makeThumbHashDataUrl(city.thumbhashBase64),
+    finalSrc: city.src,
+  });
 
   reloadFinalImages();
 } catch (error) {

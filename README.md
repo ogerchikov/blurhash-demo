@@ -111,11 +111,11 @@ The page also compares BlurHash and ThumbHash in two adjacent `previewsrc` image
 JavaScript side uses the same decoder libraries and `photos.json` values as the main comparison,
 converts the decoded pixels to a PNG data URL, and supplies that raster through `previewsrc`. The
 native side supplies encoded `application/x-blurhash` and `application/x-thumbhash` data URLs
-directly through `previewsrc` without JavaScript decoding. It displays **Not supported** unless the
-browser has both the native preview API and a decoder that can render the corresponding media type;
-the polyfill does not decode hashes. The replay control holds previews before assigning the
-corresponding final image sources. This initial API and polyfill demo intentionally excludes View
-Transition behavior.
+directly through `previewsrc` without application-level decoding. Browsers with the native API
+decode those formats natively; otherwise the polyfill imports the shared hash utilities, converts
+the hash to an internal PNG data URL, and uses the same preview lifecycle as standard images. The
+replay control holds previews before assigning the corresponding final image sources. This initial
+API and polyfill demo intentionally excludes View Transition behavior.
 
 ## Precompute `photos.json`
 

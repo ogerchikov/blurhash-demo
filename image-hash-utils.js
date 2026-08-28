@@ -26,6 +26,14 @@ export function makeThumbhashCanvas(hashBytes) {
   return makeCanvasFromRGBA(decoded.rgba, decoded.w, decoded.h);
 }
 
+export function blurhashToRasterDataUrl(hash, width, height) {
+  return makeBlurhashCanvas(hash, width, height).toDataURL("image/png");
+}
+
+export function thumbhashToRasterDataUrl(hashBytes) {
+  return makeThumbhashCanvas(hashBytes).toDataURL("image/png");
+}
+
 export function base64ToBytes(base64) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
