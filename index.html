@@ -8,17 +8,17 @@
 </head>
 <body>
   <main class="app-shell">
-    <header class="hero">
-      <h1>BlurHash vs ThumbHash vs LQIP vs AVIF vs Color vs Shimmer</h1>
-      <p>Same source image, synchronized playback, side-by-side metrics.</p>
-      <p class="utility-links">
-        <a class="utility-link" href="./native-image-preview.html">Open Native Image Preview Demo</a>
-        <a class="utility-link" href="./precompute.html">Open Browser Precompute Tool</a>
-        <a class="utility-link" href="./comparison-table.html">Open Comparison Table Page</a>
-      </p>
-    </header>
-
     <div class="comparison-panel">
+      <header class="hero">
+        <h1>BlurHash vs ThumbHash vs LQIP vs AVIF vs Color vs Shimmer</h1>
+        <p>Same source image, synchronized playback, side-by-side metrics.</p>
+        <p class="utility-links">
+          <a class="utility-link" href="./native-image-preview.html">Open Native Image Preview Demo</a>
+          <a class="utility-link" href="./precompute.html">Open Browser Precompute Tool</a>
+          <a class="utility-link" href="./comparison-table.html">Open Comparison Table Page</a>
+        </p>
+      </header>
+
       <section class="controls" aria-label="Comparison Controls">
         <label>
           Swap Delay
@@ -135,30 +135,28 @@
       <h2>Per-Image Placeholder Rows</h2>
       <p id="allImagesStatus" class="status">Loading images...</p>
       <div class="index-rows-scroller">
-        <div class="table-scroll index-rows-scroll">
-          <table class="preview-table index-rows-table">
-            <thead>
-              <tr>
-                <th scope="col">Image</th>
-                <th scope="col">Original</th>
-                <th scope="col">BlurHash</th>
-                <th scope="col">ThumbHash</th>
-                <th scope="col">LQIP</th>
-                <th scope="col">AVIF</th>
-                <th scope="col">Color</th>
-                <th scope="col">Shimmer</th>
-                <th scope="col">First Paint</th>
-                <th scope="col">Block Est</th>
-                <th scope="col">Similarity</th>
-              </tr>
-            </thead>
-            <tbody id="allImagesRowsBody">
-              <tr>
-                <td colspan="11" class="table-empty">Loading rows...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <table class="preview-table index-rows-table">
+          <thead>
+            <tr>
+              <th scope="col">Image</th>
+              <th scope="col">Original</th>
+              <th scope="col">BlurHash</th>
+              <th scope="col">ThumbHash</th>
+              <th scope="col">LQIP</th>
+              <th scope="col">AVIF</th>
+              <th scope="col">Color</th>
+              <th scope="col">Shimmer</th>
+              <th scope="col">First Paint</th>
+              <th scope="col">Block Est</th>
+              <th scope="col">Similarity</th>
+            </tr>
+          </thead>
+          <tbody id="allImagesRowsBody">
+            <tr>
+              <td colspan="11" class="table-empty">Loading rows...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
   </main>

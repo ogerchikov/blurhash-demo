@@ -1,14 +1,9 @@
-
 import {
   base64ToBytes,
   makeBlurhashCanvas,
-  makeCanvasFromRGBA,
   makeThumbhashCanvas,
 } from "./image-hash-utils.js";
-
-const DEFAULT_IMAGE_SRC = "./images/beach.png";
-const PHOTOS_MANIFEST_SRC = "./photos.json";
-const SUPPORTED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]);
+import { loadPhotosManifest } from "./manifest.js";
 
 const delayInput = document.getElementById("delayInput");
 const delayValue = document.getElementById("delayValue");
@@ -72,7 +67,7 @@ const state = {
   sourceImage: null,
   imageRecord: null,
   manifestImages: [],
-  currentImageSrc: DEFAULT_IMAGE_SRC,
+  currentImageSrc: null,
   availableImageSrcs: [],
   blurhashString: null,
   thumbHashBytes: null,
@@ -125,36 +120,6 @@ function makeColorPlaceholderNode(hex) {
   return node;
 }
 
-function makeShimmerDataUrl(width, height, baseHex, animate = true) {
-  const safeWidth = Math.max(1, Math.round(width));
-  const safeHeight = Math.max(1, Math.round(height));
-  const sweep = safeWidth * 2;
-  const base = hexToRgb(baseHex);
-  const edgeHex = rgbToHex(...Object.values(mixWithWhite(base, 0.08)));
-  const highlightHex = rgbToHex(...Object.values(mixWithWhite(base, 0.16)));
-  const animation = animate
-    ? `
-      <animate attributeName="x1" values="-${sweep};${sweep}" dur="1.8s" repeatCount="indefinite" />
-      <animate attributeName="x2" values="0;${sweep * 2}" dur="1.8s" repeatCount="indefinite" />`
-    : "";
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeWidth} ${safeHeight}" preserveAspectRatio="none">
-  <defs>
-    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="-${sweep}" y1="0" x2="0" y2="0">
-      <stop offset="0%" stop-color="${baseHex}" />
-      <stop offset="44%" stop-color="${edgeHex}" />
-      <stop offset="50%" stop-color="${highlightHex}" />
-      <stop offset="56%" stop-color="${edgeHex}" />
-      <stop offset="100%" stop-color="${baseHex}" />
-      ${animation}
-    </linearGradient>
-  </defs>
-  <rect width="${safeWidth}" height="${safeHeight}" fill="url(#g)" />
-</svg>`;
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.trim())}`;
-}
-
 function makeShimmerImageNode(dataUrl) {
   const image = new Image();
   image.className = "shimmer-preview";
@@ -185,20 +150,8 @@ function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtN
     && typeof viewport.startViewTransition === "function"
   ) {
     viewport.startViewTransition(replacePreview);
-  } else if (state.prefersReducedMotion) {
-    replacePreview();
   } else {
-    image.classList.add("full-image-enter");
-    viewport.appendChild(image);
-    placeholderNode.classList.add("placeholder-exit");
-
-    image.getBoundingClientRect();
-    requestAnimationFrame(() => {
-      image.classList.add("is-visible");
-    });
-
-    image.addEventListener("transitionend", () => placeholderNode.remove(), { once: true });
-    updateShownStatus();
+    replacePreview();
   }
 }
 
@@ -239,82 +192,6 @@ function decodeHeightToSize(decodeHeight, ratio) {
 
 function normalizeSrc(src) {
   return src.replace(/^\.\//, "");
-}
-
-function extname(fileName) {
-  const dot = fileName.lastIndexOf(".");
-  if (dot < 0) {
-    return "";
-  }
-
-  return fileName.slice(dot).toLowerCase();
-}
-
-function isSupportedImage(fileName) {
-  return SUPPORTED_EXTENSIONS.has(extname(fileName));
-}
-
-async function listImagesFromFolder() {
-  const response = await fetch("./images/");
-  if (!response.ok) {
-    throw new Error(`Failed to read images folder (${response.status})`);
-  }
-
-  const html = await response.text();
-  const hrefMatches = [...html.matchAll(/href=["']([^"']+)["']/gi)];
-
-  const names = hrefMatches
-    .map((match) => match[1])
-    .map((href) => {
-      const clean = href.split("?")[0].split("#")[0];
-      const parts = clean.split("/").filter(Boolean);
-      return parts[parts.length - 1] || "";
-    })
-    .filter((name) => name.length > 0)
-    .filter((name) => isSupportedImage(name));
-
-  const unique = [...new Set(names)].sort((a, b) => a.localeCompare(b));
-  return unique.map((name) => `./images/${name}`);
-}
-
-async function listImagesFromManifest() {
-  const images = await loadManifestImages();
-
-  return images
-    .map((item) => item?.src)
-    .filter((src) => typeof src === "string" && src.trim().length > 0);
-}
-
-async function loadManifestImages() {
-  const response = await fetch(PHOTOS_MANIFEST_SRC, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch photos.json (${response.status})`);
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload?.images) ? payload.images : [];
-}
-
-async function loadAvailableImages() {
-  try {
-    const fromFolder = await listImagesFromFolder();
-    if (fromFolder.length > 0) {
-      return fromFolder;
-    }
-  } catch {
-    // Fall back to photos.json when directory listing is not available.
-  }
-
-  try {
-    const fromManifest = await listImagesFromManifest();
-    if (fromManifest.length > 0) {
-      return fromManifest;
-    }
-  } catch {
-    // Fall back to a default image when manifest is not available.
-  }
-
-  return [DEFAULT_IMAGE_SRC];
 }
 
 function decodeSizeForRow(record) {
@@ -496,16 +373,12 @@ function createImageRows(records, imageSrcs, selectedSrc, onSelect) {
   });
 }
 
-async function loadManifestRecord(imageSrc) {
-  const images = state.manifestImages.length > 0 ? state.manifestImages : await loadManifestImages();
-
-  if (images.length === 0) {
-    throw new Error("photos.json has no images[] records");
-  }
-
+function loadManifestRecord(imageSrc) {
   const target = normalizeSrc(imageSrc);
-  const matched = images.find((item) => normalizeSrc(item.src || "") === target) || images[0];
-
+  const matched = state.manifestImages.find((item) => normalizeSrc(item.src || "") === target);
+  if (!matched) {
+    throw new Error(`No photos.json record found for ${imageSrc}`);
+  }
   return matched;
 }
 
@@ -521,12 +394,7 @@ async function prepareComparisonForImage(imageSrc) {
   state.aspectRatio = state.sourceImage.naturalWidth / state.sourceImage.naturalHeight;
   setViewportAspect(state.aspectRatio);
 
-  try {
-    state.imageRecord = await loadManifestRecord(state.currentImageSrc);
-  } catch (error) {
-    console.warn("photos.json load failed", error);
-    state.imageRecord = null;
-  }
+  state.imageRecord = loadManifestRecord(state.currentImageSrc);
 
   if (state.imageRecord?.blurhash) {
     state.blurhashString = state.imageRecord.blurhash;
@@ -1219,15 +1087,10 @@ async function init() {
     viewTransitionInput.title = "Animate each preview swap with an element-scoped View Transition.";
   }
 
-  state.availableImageSrcs = await loadAvailableImages();
-  let manifestImages = [];
-  try {
-    manifestImages = await loadManifestImages();
-  } catch {
-    manifestImages = [];
-  }
-  state.manifestImages = manifestImages;
-  state.currentImageSrc = state.availableImageSrcs[0] || DEFAULT_IMAGE_SRC;
+  const manifest = await loadPhotosManifest();
+  state.manifestImages = manifest.images;
+  state.availableImageSrcs = manifest.images.map((item) => item.src);
+  state.currentImageSrc = state.availableImageSrcs[0];
   await prepareComparisonForImage(state.currentImageSrc);
   createImageRows(state.manifestImages, state.availableImageSrcs, state.currentImageSrc, onSelectImageRow);
 

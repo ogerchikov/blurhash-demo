@@ -25,8 +25,6 @@ body {
 }
 
 .app-shell {
-  max-width: 1100px;
-  margin: 0 auto;
   padding: 28px 18px 36px;
 }
 
@@ -52,12 +50,11 @@ body {
 }
 
 .comparison-panel {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: rgba(243, 247, 251, 0.94);
-  backdrop-filter: blur(8px);
-  padding-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 8px 24px rgba(19, 33, 52, 0.12);
+  padding: 16px;
 }
 
 .controls {
@@ -144,7 +141,6 @@ body {
   padding: 14px;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .tech-card h2 {
@@ -213,34 +209,6 @@ body {
 .color-preview {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.shimmer-preview {
-  width: 100%;
-  height: 100%;
-}
-
-.full-image-enter {
-  opacity: 0;
-  transform: scale(1.02);
-  transition:
-    opacity 360ms ease-out,
-    transform 500ms ease-out;
-}
-
-.full-image-enter.is-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.placeholder-exit {
-  opacity: 0;
-  transform: scale(0.99);
-  transition:
-    opacity 360ms ease-out,
-    transform 500ms ease-out;
 }
 
 @keyframes scoped-preview-exit {
@@ -266,11 +234,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .full-image-enter,
-  .placeholder-exit {
-    transition: none;
-  }
-
   .viewport::view-transition-old(preview-image),
   .viewport::view-transition-new(preview-image) {
     animation: none;
@@ -334,7 +297,6 @@ body {
 }
 
 .table-scroll {
-  width: 100%;
   overflow-x: auto;
 }
 
@@ -382,6 +344,7 @@ body {
 }
 
 .table-viewport {
+  position: relative;
   width: 160px;
   height: 106px;
   border-radius: 8px;
@@ -437,11 +400,6 @@ body {
   border-radius: 12px;
   background: #fff;
   box-shadow: inset 0 1px 0 rgba(17, 24, 39, 0.02);
-}
-
-.index-rows-scroll {
-  margin-top: 0;
-  overflow: visible;
 }
 
 .index-rows-table thead th {

@@ -1,7 +1,7 @@
 import { decode as decodeBlurHash } from "https://cdn.jsdelivr.net/npm/blurhash/+esm";
 import { thumbHashToRGBA } from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
+import { loadPhotosManifest } from "./manifest.js";
 
-const PHOTOS_MANIFEST_SRC = "./photos.json";
 const tableBody = document.getElementById("previewTableBody");
 
 function normalizeSrc(src) {
@@ -30,36 +30,6 @@ function makeCanvasFromRGBA(rgba, width, height) {
   context.putImageData(imageData, 0, 0);
 
   return canvas;
-}
-
-function componentToHex(value) {
-  return Math.max(0, Math.min(255, value)).toString(16).padStart(2, "0");
-}
-
-function rgbToHex(r, g, b) {
-  return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
-}
-
-function hexToRgb(hex) {
-  const normalized = String(hex || "").trim().replace(/^#/, "");
-  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
-    return { r: 184, g: 198, b: 216 };
-  }
-
-  return {
-    r: Number.parseInt(normalized.slice(0, 2), 16),
-    g: Number.parseInt(normalized.slice(2, 4), 16),
-    b: Number.parseInt(normalized.slice(4, 6), 16),
-  };
-}
-
-function mixWithWhite(color, amount) {
-  const t = Math.max(0, Math.min(1, amount));
-  return {
-    r: Math.round(color.r + (255 - color.r) * t),
-    g: Math.round(color.g + (255 - color.g) * t),
-    b: Math.round(color.b + (255 - color.b) * t),
-  };
 }
 
 function decodeSizeForRecord(record) {
@@ -288,17 +258,6 @@ function buildRow(record) {
   return row;
 }
 
-async function loadManifest() {
-  const response = await fetch(PHOTOS_MANIFEST_SRC, { cache: "no-store" });
-
-  if (!response.ok) {
-    throw new Error(`Failed to load photos.json (${response.status})`);
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload?.images) ? payload.images : [];
-}
-
 function renderEmpty(message) {
   tableBody.innerHTML = "";
   const row = document.createElement("tr");
@@ -312,12 +271,7 @@ function renderEmpty(message) {
 
 async function init() {
   try {
-    const records = await loadManifest();
-
-    if (records.length === 0) {
-      renderEmpty("photos.json has no images[] records.");
-      return;
-    }
+    const { images: records } = await loadPhotosManifest();
 
     tableBody.innerHTML = "";
     records.forEach((record) => {
@@ -325,7 +279,7 @@ async function init() {
     });
   } catch (error) {
     console.error(error);
-    renderEmpty("Failed to load comparison data.");
+    renderEmpty(error.message);
   }
 }
 
