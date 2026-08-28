@@ -95,8 +95,8 @@ Open `native-image-preview.html` for a responsive gallery of every image listed 
 Each card preserves the photo dimensions from the manifest and uses a real `<img>` with
 `previewsrc`. A labeled selector applies one preview format to the entire gallery:
 
-- BlurHash using `data:application/x-blurhash,...`
-- ThumbHash using `data:application/x-thumbhash;base64,...`
+- BlurHash using `data:image/blurhash,...`
+- ThumbHash using `data:image/thumbhash;base64,...`
 - LQIP / blur-up using the manifest's inline image data URL
 - Inline AVIF using the manifest's AVIF preview data URL
 

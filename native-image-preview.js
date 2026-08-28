@@ -1,3 +1,5 @@
+import { galleryPreviewFormats as formats } from "./gallery-preview-formats.js";
+
 const PREVIEW_DURATION_MS = 2500;
 
 const formatSelect = document.getElementById("previewFormatSelect");
@@ -6,37 +8,6 @@ const implementationBadge = document.getElementById("implementationBadge");
 const galleryStatus = document.getElementById("galleryStatus");
 const photoCount = document.getElementById("photoCount");
 const gallery = document.getElementById("photoGallery");
-
-const formats = {
-  blurhash: {
-    label: "BlurHash",
-    getPreview(record) {
-      return record.blurhash
-        ? `data:application/x-blurhash,${encodeURIComponent(record.blurhash)}`
-        : "";
-    },
-  },
-  thumbhash: {
-    label: "ThumbHash",
-    getPreview(record) {
-      return record.thumbhashBase64
-        ? `data:application/x-thumbhash;base64,${record.thumbhashBase64}`
-        : "";
-    },
-  },
-  lqip: {
-    label: "LQIP / blur-up",
-    getPreview(record) {
-      return record.lqip?.dataUrl || "";
-    },
-  },
-  avif: {
-    label: "Inline AVIF",
-    getPreview(record) {
-      return record.avif?.dataUrl || "";
-    },
-  },
-};
 
 let entries = [];
 let replayTimer;
