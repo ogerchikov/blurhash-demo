@@ -38,7 +38,7 @@
   }
 
   async function getDisplayablePreviewUrl(previewUrl, image) {
-    if (previewUrl.startsWith("data:application/x-blurhash,")) {
+    if (previewUrl.startsWith("data:image/blurhash,")) {
       const hash = decodeURIComponent(previewUrl.slice(previewUrl.indexOf(",") + 1));
       const size = getBlurHashSize(image);
       hashUtilsModule ||= import("./image-hash-utils.js");
@@ -46,7 +46,7 @@
       return blurhashToRasterDataUrl(hash, size.width, size.height);
     }
 
-    if (previewUrl.startsWith("data:application/x-thumbhash;base64,")) {
+    if (previewUrl.startsWith("data:image/thumbhash;base64,")) {
       const encoded = previewUrl.slice(previewUrl.indexOf(",") + 1);
       hashUtilsModule ||= import("./image-hash-utils.js");
       const { base64ToBytes, thumbhashToRasterDataUrl } = await hashUtilsModule;
