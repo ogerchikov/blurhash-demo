@@ -99,16 +99,20 @@ Then navigate to the local URL shown by your server.
 
 ### Native Image Preview API Demo
 
-Open `native-image-preview.html` to compare the supported preview resource forms:
+Open `native-image-preview.html` to compare the supported standard preview resource forms:
 
 - An external standard image URL supplied with the `previewsrc` attribute
 - An inline JPEG data URL supplied through the `HTMLImageElement.previewSrc` property
 
 The page detects `HTMLImageElement.prototype.previewSrc` before its image markup is parsed. Browsers
 with the API use their native implementation; other browsers load `image-preview-polyfill.js`.
-BlurHash and ThumbHash inputs are marked **Not supported** because they are encoded hashes rather
-than standard image resources. This initial API and polyfill demo intentionally excludes View
-Transition behavior.
+
+The page also compares BlurHash and ThumbHash in two adjacent columns. The JavaScript column uses
+the same decoder libraries and `photos.json` values as the main comparison. The native column uses
+declarative `previewsrc` values with `application/x-blurhash` and `application/x-thumbhash` data
+URLs. It displays **Not supported** unless the browser has both the native preview API and a decoder
+that can render the corresponding media type; the polyfill does not decode hashes. This initial API
+and polyfill demo intentionally excludes View Transition behavior.
 
 ## Precompute `photos.json`
 

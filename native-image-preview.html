@@ -21,7 +21,8 @@
       <h1>Native Image Preview API</h1>
       <p>
         Use <code>previewsrc</code> or <code>HTMLImageElement.previewSrc</code> to show a
-        standard image while the final source loads.
+        preview while the final source loads, and compare JavaScript hash decoders with the
+        proposed native hash resource types.
       </p>
       <p class="utility-links">
         <a class="utility-link" href="./index.html">Back to Main Comparison</a>
@@ -37,7 +38,75 @@
       <button id="reloadPreviewsButton" type="button">Reload Final Images</button>
     </section>
 
-    <section class="native-preview-grid" aria-label="Native image preview input examples">
+    <section class="hash-comparison" aria-labelledby="hash-comparison-heading">
+      <div class="section-heading">
+        <h2 id="hash-comparison-heading">Hash decoding comparison</h2>
+        <p>Both columns use the same values from <code>photos.json</code>.</p>
+      </div>
+
+      <article class="hash-comparison-row" aria-labelledby="blurhash-comparison-heading">
+        <h2 id="blurhash-comparison-heading">BlurHash</h2>
+        <p class="hash-source"><code id="blurHashValue">Loading manifest value...</code></p>
+        <div class="hash-comparison-columns">
+          <section class="native-preview-card" aria-labelledby="blurhash-js-heading">
+            <h3 id="blurhash-js-heading">JavaScript decoded</h3>
+            <div id="blurHashJsPreview" class="native-preview-frame" role="img" aria-label="BlurHash decoded in JavaScript"></div>
+            <p id="blurHashJsStatus" class="status">Decoding with the BlurHash library...</p>
+          </section>
+
+          <section class="native-preview-card" aria-labelledby="blurhash-native-heading">
+            <h3 id="blurhash-native-heading">Native decoded</h3>
+            <div class="native-preview-frame native-preview-frame--native">
+              <img
+                id="blurHashNativePreview"
+                alt="Forest trail using a native BlurHash preview"
+                width="1536"
+                height="1024"
+                hidden
+              />
+              <strong id="blurHashUnsupported" class="unsupported-preview">Not supported</strong>
+            </div>
+            <p id="blurHashNativeStatus" class="status">Checking native decoder support...</p>
+            <p class="native-preview-syntax"><code>data:application/x-blurhash,...</code></p>
+          </section>
+        </div>
+      </article>
+
+      <article class="hash-comparison-row" aria-labelledby="thumbhash-comparison-heading">
+        <h2 id="thumbhash-comparison-heading">ThumbHash</h2>
+        <p class="hash-source"><code id="thumbHashValue">Loading manifest value...</code></p>
+        <div class="hash-comparison-columns">
+          <section class="native-preview-card" aria-labelledby="thumbhash-js-heading">
+            <h3 id="thumbhash-js-heading">JavaScript decoded</h3>
+            <div id="thumbHashJsPreview" class="native-preview-frame" role="img" aria-label="ThumbHash decoded in JavaScript"></div>
+            <p id="thumbHashJsStatus" class="status">Decoding with the ThumbHash library...</p>
+          </section>
+
+          <section class="native-preview-card" aria-labelledby="thumbhash-native-heading">
+            <h3 id="thumbhash-native-heading">Native decoded</h3>
+            <div class="native-preview-frame native-preview-frame--native">
+              <img
+                id="thumbHashNativePreview"
+                alt="City skyline using a native ThumbHash preview"
+                width="1536"
+                height="1024"
+                hidden
+              />
+              <strong id="thumbHashUnsupported" class="unsupported-preview">Not supported</strong>
+            </div>
+            <p id="thumbHashNativeStatus" class="status">Checking native decoder support...</p>
+            <p class="native-preview-syntax"><code>data:application/x-thumbhash;base64,...</code></p>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <section class="native-preview-examples" aria-labelledby="standard-examples-heading">
+      <div class="section-heading">
+        <h2 id="standard-examples-heading">Standard image previews</h2>
+        <p>These inputs work with either the native API or the standard-image polyfill.</p>
+      </div>
+      <div class="native-preview-grid">
       <article class="native-preview-card">
         <h2>External image URL</h2>
         <div class="native-preview-frame">
@@ -75,24 +144,7 @@
           <div><dt>Final</dt><dd><code>./images/beach.png</code></dd></div>
         </dl>
       </article>
-
-      <article class="native-preview-card native-preview-card--unsupported">
-        <h2>BlurHash string</h2>
-        <div class="unsupported-preview" aria-label="BlurHash preview support status">Not supported</div>
-        <p class="status">Encoded hashes are not standard image resources.</p>
-        <dl class="native-preview-details">
-          <div><dt>Input</dt><dd><code>LJIhjc2yZ|ai0I$+nOtS+j,WOFs,</code></dd></div>
-        </dl>
-      </article>
-
-      <article class="native-preview-card native-preview-card--unsupported">
-        <h2>ThumbHash string</h2>
-        <div class="unsupported-preview" aria-label="ThumbHash preview support status">Not supported</div>
-        <p class="status">Hash decoders remain an application concern.</p>
-        <dl class="native-preview-details">
-          <div><dt>Input</dt><dd><code>pNcNXZBoeIeQl4eIiJd1Z5RwNwiX</code></dd></div>
-        </dl>
-      </article>
+      </div>
     </section>
 
     <section class="native-preview-note" aria-labelledby="demo-notes-heading">

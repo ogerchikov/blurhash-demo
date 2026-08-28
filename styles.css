@@ -517,6 +517,54 @@ body {
   gap: 14px;
 }
 
+.hash-comparison,
+.native-preview-examples {
+  margin-top: 20px;
+}
+
+.section-heading h2,
+.section-heading p {
+  margin: 0;
+}
+
+.section-heading p {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.hash-comparison-row {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.hash-comparison-row > h2 {
+  margin: 0;
+  color: var(--blurhash-accent);
+}
+
+.hash-source {
+  margin: 6px 0 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.hash-comparison-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.hash-comparison-columns .native-preview-card {
+  background: #f8fbff;
+}
+
+.native-preview-card h3 {
+  margin: 0 0 10px;
+}
+
 .native-preview-card,
 .native-preview-note {
   padding: 14px;
@@ -534,12 +582,7 @@ body {
   color: var(--blurhash-accent);
 }
 
-.native-preview-card--unsupported h2 {
-  color: var(--muted);
-}
-
-.native-preview-frame,
-.unsupported-preview {
+.native-preview-frame {
   width: 100%;
   aspect-ratio: 3 / 2;
   overflow: hidden;
@@ -555,12 +598,32 @@ body {
   object-fit: cover;
 }
 
-.unsupported-preview {
+.native-preview-frame canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: auto;
+}
+
+.native-preview-frame--native {
   display: grid;
   place-items: center;
+}
+
+.native-preview-frame--native > * {
+  grid-area: 1 / 1;
+}
+
+.unsupported-preview {
   color: var(--muted);
   font-size: 18px;
-  font-weight: 700;
+}
+
+.native-preview-syntax {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .native-preview-details {
@@ -601,6 +664,10 @@ body {
   }
 
   .native-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hash-comparison-columns {
     grid-template-columns: 1fr;
   }
 }
