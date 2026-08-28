@@ -9,7 +9,8 @@ A browser-based demo that compares multiple image placeholder techniques side by
 - Color placeholder
 - Shimmer placeholder
 
-The demo supports per-image comparison rows and basic benchmark metrics for each technique.
+The demo supports per-image comparison rows, basic benchmark metrics,
+and a separate demo of the proposed native image-preview API.
 
 ## Project Structure
 
@@ -18,6 +19,9 @@ The demo supports per-image comparison rows and basic benchmark metrics for each
 - `styles.css`: Shared styles for cards, tables, placeholders, and transitions.
 - `comparison-table.html`: Dedicated table page for comparing original and placeholders.
 - `comparison-table.js`: Data loading and placeholder rendering for the comparison table page.
+- `native-image-preview.html`: Native `previewsrc` / `HTMLImageElement.previewSrc` API demo.
+- `native-image-preview.js`: Demo setup, implementation status, and final-image reload behavior.
+- `image-preview-polyfill.js`: Fallback implementation loaded only when the native API is unavailable.
 - `precompute.html`: Browser-only precompute tool page.
 - `precompute-browser.js`: Computes placeholder data in-browser and exports `photos.json`.
 - `photos.json`: Precomputed manifest consumed by the app.
@@ -84,6 +88,23 @@ python -m http.server 8080
 ```
 
 Then navigate to the local URL shown by your server.
+
+### Native Image Preview Gallery
+
+Open `native-image-preview.html` for a responsive gallery of every image listed in `photos.json`.
+Each card preserves the photo dimensions from the manifest and uses a real `<img>` with
+`previewsrc`. A labeled selector applies one preview format to the entire gallery:
+
+- BlurHash using `data:application/x-blurhash,...`
+- ThumbHash using `data:application/x-thumbhash;base64,...`
+- LQIP / blur-up using the manifest's inline image data URL
+- Inline AVIF using the manifest's AVIF preview data URL
+
+Changing the format automatically replays the gallery, and **Reload previews** repeats the selected
+preview with cache-busted final image requests. Previews remain visible for a short fixed delay
+before final `src` values are assigned. The page prefers a native
+`HTMLImageElement.previewSrc` implementation and loads `image-preview-polyfill.js` only when the
+native API is absent. No View Transition behavior is used.
 
 ## Precompute `photos.json`
 

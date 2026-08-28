@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Preview Gallery</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script>
+    window.imagePreviewDemo = {
+      implementation: "previewSrc" in HTMLImageElement.prototype ? "Native API" : "Polyfill",
+    };
+
+    if (window.imagePreviewDemo.implementation === "Polyfill") {
+      document.write('<script src="./image-preview-polyfill.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+  <main class="app-shell gallery-shell">
+    <header class="gallery-hero">
+      <div>
+        <p class="gallery-eyebrow">Native image previews</p>
+        <h1>Photo gallery</h1>
+        <p>Choose one preview format and replay the loading experience across every photo.</p>
+      </div>
+      <p class="utility-links">
+        <a class="utility-link" href="./index.html">Back to Main Comparison</a>
+        <a class="utility-link" href="./comparison-table.html">Open Comparison Table</a>
+      </p>
+    </header>
+
+    <section class="gallery-toolbar" aria-label="Gallery preview controls">
+      <label class="gallery-format-control" for="previewFormatSelect">
+        Preview format
+        <select id="previewFormatSelect">
+          <option value="blurhash">BlurHash</option>
+          <option value="thumbhash">ThumbHash</option>
+          <option value="lqip">LQIP / blur-up</option>
+          <option value="avif">Inline AVIF</option>
+        </select>
+      </label>
+      <div class="gallery-implementation">
+        <span>Preview engine</span>
+        <strong id="implementationBadge" class="implementation-badge">Detecting...</strong>
+      </div>
+      <button id="reloadGalleryButton" type="button">Reload previews</button>
+    </section>
+
+    <section class="gallery-summary" aria-live="polite">
+      <p id="galleryStatus">Loading photo manifest...</p>
+      <strong id="photoCount">0 photos</strong>
+    </section>
+
+    <section id="photoGallery" class="photo-gallery" aria-label="Photo preview gallery" aria-busy="true"></section>
+  </main>
+
+  <script type="module" src="./native-image-preview.js"></script>
+</body>
+</html>

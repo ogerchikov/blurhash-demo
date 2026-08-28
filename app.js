@@ -1,7 +1,8 @@
-import { decode as decodeBlurHash } from "https://cdn.jsdelivr.net/npm/blurhash/+esm";
 import {
-  thumbHashToRGBA,
-} from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
+  base64ToBytes,
+  makeBlurhashCanvas,
+  makeThumbhashCanvas,
+} from "./image-hash-utils.js";
 import { loadPhotosManifest } from "./manifest.js";
 
 const delayInput = document.getElementById("delayInput");
@@ -82,29 +83,34 @@ const state = {
   rowBenchmarksBySrc: new Map(),
 };
 
-function makeCanvasFromRGBA(rgba, width, height) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  const imageData = context.createImageData(width, height);
-  imageData.data.set(rgba);
-  context.putImageData(imageData, 0, 0);
-
-  return canvas;
+function componentToHex(value) {
+  return Math.max(0, Math.min(255, value)).toString(16).padStart(2, "0");
 }
 
-function makeBlurhashCanvas(hash, width, height) {
-  const safeWidth = Math.max(1, Math.round(width));
-  const safeHeight = Math.max(1, Math.round(height));
-  const rgba = decodeBlurHash(hash, safeWidth, safeHeight);
-  return makeCanvasFromRGBA(rgba, safeWidth, safeHeight);
+function rgbToHex(r, g, b) {
+  return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
 }
 
-function makeThumbhashCanvas(hashBytes) {
-  const decoded = thumbHashToRGBA(hashBytes);
-  return makeCanvasFromRGBA(decoded.rgba, decoded.w, decoded.h);
+function hexToRgb(hex) {
+  const normalized = String(hex || "").trim().replace(/^#/, "");
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+    return { r: 184, g: 198, b: 216 };
+  }
+
+  return {
+    r: Number.parseInt(normalized.slice(0, 2), 16),
+    g: Number.parseInt(normalized.slice(2, 4), 16),
+    b: Number.parseInt(normalized.slice(4, 6), 16),
+  };
+}
+
+function mixWithWhite(color, amount) {
+  const t = Math.max(0, Math.min(1, amount));
+  return {
+    r: Math.round(color.r + (255 - color.r) * t),
+    g: Math.round(color.g + (255 - color.g) * t),
+    b: Math.round(color.b + (255 - color.b) * t),
+  };
 }
 
 function makeColorPlaceholderNode(hex) {
@@ -182,17 +188,6 @@ function decodeHeightToSize(decodeHeight, ratio) {
   const height = Math.max(1, Number(decodeHeight));
   const width = Math.max(1, Math.round(height * ratio));
   return { width, height };
-}
-
-function base64ToBytes(base64) {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  return bytes;
 }
 
 function normalizeSrc(src) {
@@ -275,8 +270,7 @@ function createImageRows(records, imageSrcs, selectedSrc, onSelect) {
     const blurhashCell = document.createElement("td");
     if (record?.blurhash) {
       const size = decodeSizeForRow(record);
-      const rgba = decodeBlurHash(record.blurhash, size.width, size.height);
-      const canvas = makeCanvasFromRGBA(rgba, size.width, size.height);
+      const canvas = makeBlurhashCanvas(record.blurhash, size.width, size.height);
       const viewport = createRowViewport();
       viewport.appendChild(canvas);
       blurhashCell.appendChild(viewport);
@@ -287,8 +281,7 @@ function createImageRows(records, imageSrcs, selectedSrc, onSelect) {
     const thumbhashCell = document.createElement("td");
     if (record?.thumbhashBase64) {
       const thumbBytes = base64ToBytes(record.thumbhashBase64);
-      const decoded = thumbHashToRGBA(thumbBytes);
-      const canvas = makeCanvasFromRGBA(decoded.rgba, decoded.w, decoded.h);
+      const canvas = makeThumbhashCanvas(thumbBytes);
       const viewport = createRowViewport();
       viewport.appendChild(canvas);
       thumbhashCell.appendChild(viewport);
@@ -656,8 +649,7 @@ async function computeRowBenchmarks(src, record) {
 
   if (record?.thumbhashBase64) {
     const t0 = performance.now();
-    const decoded = thumbHashToRGBA(base64ToBytes(record.thumbhashBase64));
-    const canvas = makeCanvasFromRGBA(decoded.rgba, decoded.w, decoded.h);
+    const canvas = makeThumbhashCanvas(base64ToBytes(record.thumbhashBase64));
     const t1 = performance.now();
     const duration = t1 - t0;
     result.firstPaint.thumbhash = duration;
