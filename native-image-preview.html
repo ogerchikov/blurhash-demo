@@ -35,6 +35,14 @@
         <span class="implementation-label">Active implementation</span>
         <strong id="implementationBadge" class="implementation-badge">Detecting...</strong>
       </div>
+      <label class="preview-delay-control">
+        Preview delay
+        <select id="previewDelaySelect">
+          <option value="1000">1 second</option>
+          <option value="1500" selected>1.5 seconds</option>
+          <option value="2500">2.5 seconds</option>
+        </select>
+      </label>
       <button id="reloadPreviewsButton" type="button">Reload Final Images</button>
     </section>
 
@@ -49,13 +57,20 @@
         <p class="hash-source"><code id="blurHashValue">Loading manifest value...</code></p>
         <div class="hash-comparison-columns">
           <section class="native-preview-card" aria-labelledby="blurhash-js-heading">
-            <h3 id="blurhash-js-heading">JavaScript decoded</h3>
-            <div id="blurHashJsPreview" class="native-preview-frame" role="img" aria-label="BlurHash decoded in JavaScript"></div>
-            <p id="blurHashJsStatus" class="status">Decoding with the BlurHash library...</p>
+            <h3 id="blurhash-js-heading"><code>previewsrc</code>: JavaScript-decoded raster</h3>
+            <div class="native-preview-frame">
+              <img
+                id="blurHashJsPreview"
+                alt="Forest trail using a JavaScript-decoded BlurHash raster preview"
+                width="1536"
+                height="1024"
+              />
+            </div>
+            <p id="blurHashJsStatus" class="status">Preparing raster preview...</p>
           </section>
 
           <section class="native-preview-card" aria-labelledby="blurhash-native-heading">
-            <h3 id="blurhash-native-heading">Native decoded</h3>
+            <h3 id="blurhash-native-heading"><code>previewsrc</code>: Native hash</h3>
             <div class="native-preview-frame native-preview-frame--native">
               <img
                 id="blurHashNativePreview"
@@ -77,13 +92,20 @@
         <p class="hash-source"><code id="thumbHashValue">Loading manifest value...</code></p>
         <div class="hash-comparison-columns">
           <section class="native-preview-card" aria-labelledby="thumbhash-js-heading">
-            <h3 id="thumbhash-js-heading">JavaScript decoded</h3>
-            <div id="thumbHashJsPreview" class="native-preview-frame" role="img" aria-label="ThumbHash decoded in JavaScript"></div>
-            <p id="thumbHashJsStatus" class="status">Decoding with the ThumbHash library...</p>
+            <h3 id="thumbhash-js-heading"><code>previewsrc</code>: JavaScript-decoded raster</h3>
+            <div class="native-preview-frame">
+              <img
+                id="thumbHashJsPreview"
+                alt="City skyline using a JavaScript-decoded ThumbHash raster preview"
+                width="1536"
+                height="1024"
+              />
+            </div>
+            <p id="thumbHashJsStatus" class="status">Preparing raster preview...</p>
           </section>
 
           <section class="native-preview-card" aria-labelledby="thumbhash-native-heading">
-            <h3 id="thumbhash-native-heading">Native decoded</h3>
+            <h3 id="thumbhash-native-heading"><code>previewsrc</code>: Native hash</h3>
             <div class="native-preview-frame native-preview-frame--native">
               <img
                 id="thumbHashNativePreview"
@@ -112,7 +134,6 @@
         <div class="native-preview-frame">
           <img
             id="externalPreviewImage"
-            src="./images/night-mood.jpg"
             previewsrc="./images/mountains.webp"
             alt="Night landscape, previewed by a mountain image"
             width="1536"

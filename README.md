@@ -107,12 +107,15 @@ Open `native-image-preview.html` to compare the supported standard preview resou
 The page detects `HTMLImageElement.prototype.previewSrc` before its image markup is parsed. Browsers
 with the API use their native implementation; other browsers load `image-preview-polyfill.js`.
 
-The page also compares BlurHash and ThumbHash in two adjacent columns. The JavaScript column uses
-the same decoder libraries and `photos.json` values as the main comparison. The native column uses
-declarative `previewsrc` values with `application/x-blurhash` and `application/x-thumbhash` data
-URLs. It displays **Not supported** unless the browser has both the native preview API and a decoder
-that can render the corresponding media type; the polyfill does not decode hashes. This initial API
-and polyfill demo intentionally excludes View Transition behavior.
+The page also compares BlurHash and ThumbHash in two adjacent `previewsrc` image columns. The
+JavaScript side uses the same decoder libraries and `photos.json` values as the main comparison,
+converts the decoded pixels to a PNG data URL, and supplies that raster through `previewsrc`. The
+native side supplies encoded `application/x-blurhash` and `application/x-thumbhash` data URLs
+directly through `previewsrc` without JavaScript decoding. It displays **Not supported** unless the
+browser has both the native preview API and a decoder that can render the corresponding media type;
+the polyfill does not decode hashes. The replay control holds previews before assigning the
+corresponding final image sources. This initial API and polyfill demo intentionally excludes View
+Transition behavior.
 
 ## Precompute `photos.json`
 

@@ -6,39 +6,61 @@ import {
 
 const implementationBadge = document.getElementById("implementationBadge");
 const reloadButton = document.getElementById("reloadPreviewsButton");
+const previewDelaySelect = document.getElementById("previewDelaySelect");
 const externalImage = document.getElementById("externalPreviewImage");
 const inlineImage = document.getElementById("inlinePreviewImage");
 
-const examples = [
+const replayEntries = [
   {
     image: externalImage,
     finalSrc: "./images/night-mood.jpg",
+    status: document.querySelector('[data-status-for="externalPreviewImage"]'),
   },
   {
     image: inlineImage,
     finalSrc: "./images/beach.png",
+    status: document.querySelector('[data-status-for="inlinePreviewImage"]'),
   },
 ];
-
-function setStatus(image, text) {
-  const status = document.querySelector(`[data-status-for="${image.id}"]`);
-  status.textContent = text;
-}
+let replayTimer;
 
 function reloadFinalImages() {
+  clearTimeout(replayTimer);
   const cacheKey = `preview-demo=${Date.now()}`;
+  const delay = Number(previewDelaySelect.value);
 
-  for (const { image, finalSrc } of examples) {
-    setStatus(image, "Loading final image...");
-    const url = new URL(finalSrc, document.baseURI);
-    url.search = cacheKey;
-    image.src = url.href;
+  for (const { image, status } of replayEntries) {
+    image.removeAttribute("src");
+    status.textContent = `Preview shown for ${delay / 1000} seconds`;
   }
+
+  replayTimer = setTimeout(() => {
+    for (const { image, finalSrc, status } of replayEntries) {
+      status.textContent = "Loading final image...";
+      const url = new URL(finalSrc, document.baseURI);
+      url.search = cacheKey;
+      image.src = url.href;
+    }
+  }, delay);
 }
 
-for (const { image } of examples) {
-  image.addEventListener("load", () => setStatus(image, "Final image loaded"));
-  image.addEventListener("error", () => setStatus(image, "Final image failed to load"));
+function addReplayEntry(image, finalSrc, status) {
+  replayEntries.push({ image, finalSrc, status });
+  image.addEventListener("load", () => {
+    status.textContent = "Final image loaded";
+  });
+  image.addEventListener("error", () => {
+    status.textContent = "Final image failed to load";
+  });
+}
+
+for (const { image, status } of replayEntries) {
+  image.addEventListener("load", () => {
+    status.textContent = "Final image loaded";
+  });
+  image.addEventListener("error", () => {
+    status.textContent = "Final image failed to load";
+  });
 }
 
 implementationBadge.textContent = window.imagePreviewDemo.implementation;
@@ -85,14 +107,15 @@ async function configureNativePreview({
 
   image.setAttribute("previewsrc", previewUrl);
   if (!await canDecodeNatively(previewUrl)) {
+    image.src = finalSrc;
     status.textContent = "No native decoder is available for this media type.";
     return;
   }
 
   unsupported.hidden = true;
   image.hidden = false;
-  image.src = finalSrc;
-  status.textContent = "Native decoder available";
+  status.textContent = "Native decoder available; ready to replay";
+  addReplayEntry(image, finalSrc, status);
 }
 
 try {
@@ -118,13 +141,17 @@ try {
   inlineImage.previewSrc = beach.lqip.dataUrl;
 
   const blurHashCanvas = makeBlurhashCanvas(forest.blurhash, 32, 21);
-  document.getElementById("blurHashJsPreview").appendChild(blurHashCanvas);
-  document.getElementById("blurHashJsStatus").textContent = "Decoded by the BlurHash JavaScript library";
+  const blurHashJsImage = document.getElementById("blurHashJsPreview");
+  const blurHashJsStatus = document.getElementById("blurHashJsStatus");
+  blurHashJsImage.previewSrc = blurHashCanvas.toDataURL("image/png");
+  addReplayEntry(blurHashJsImage, forest.src, blurHashJsStatus);
   document.getElementById("blurHashValue").textContent = forest.blurhash;
 
   const thumbHashCanvas = makeThumbhashCanvas(base64ToBytes(city.thumbhashBase64));
-  document.getElementById("thumbHashJsPreview").appendChild(thumbHashCanvas);
-  document.getElementById("thumbHashJsStatus").textContent = "Decoded by the ThumbHash JavaScript library";
+  const thumbHashJsImage = document.getElementById("thumbHashJsPreview");
+  const thumbHashJsStatus = document.getElementById("thumbHashJsStatus");
+  thumbHashJsImage.previewSrc = thumbHashCanvas.toDataURL("image/png");
+  addReplayEntry(thumbHashJsImage, city.src, thumbHashJsStatus);
   document.getElementById("thumbHashValue").textContent = city.thumbhashBase64;
 
   await Promise.all([
@@ -147,8 +174,8 @@ try {
   reloadFinalImages();
 } catch (error) {
   console.error(error);
-  for (const { image } of examples) {
-    setStatus(image, "Preview setup failed");
+  for (const { status } of replayEntries) {
+    status.textContent = "Preview setup failed";
   }
   document.getElementById("blurHashJsStatus").textContent = "JavaScript decoding failed";
   document.getElementById("thumbHashJsStatus").textContent = "JavaScript decoding failed";

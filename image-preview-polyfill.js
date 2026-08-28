@@ -86,11 +86,10 @@
     state.version = version;
     restoreContent(image, state);
 
-    const hasFinalSource = image.hasAttribute("src") || image.hasAttribute("srcset");
     const previewUrl = resolveUrl(image.getAttribute("previewsrc"));
     state.finalReady = image.complete && image.naturalWidth > 0;
 
-    if (!hasFinalSource || !previewUrl || state.finalReady) {
+    if (!previewUrl || state.finalReady) {
       return;
     }
 
