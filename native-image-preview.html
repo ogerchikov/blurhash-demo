@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Native Image Preview API Demo</title>
+  <title>Photo Preview Gallery</title>
   <link rel="stylesheet" href="./styles.css" />
   <script>
     window.imagePreviewDemo = {
@@ -16,162 +16,42 @@
   </script>
 </head>
 <body>
-  <main class="app-shell">
-    <header class="hero">
-      <h1>Native Image Preview API</h1>
-      <p>
-        Use <code>previewsrc</code> or <code>HTMLImageElement.previewSrc</code> to show a
-        preview while the final source loads, and compare JavaScript hash decoders with the
-        proposed native hash resource types.
-      </p>
+  <main class="app-shell gallery-shell">
+    <header class="gallery-hero">
+      <div>
+        <p class="gallery-eyebrow">Native image previews</p>
+        <h1>Photo gallery</h1>
+        <p>Choose one preview format and replay the loading experience across every photo.</p>
+      </div>
       <p class="utility-links">
         <a class="utility-link" href="./index.html">Back to Main Comparison</a>
         <a class="utility-link" href="./comparison-table.html">Open Comparison Table</a>
       </p>
     </header>
 
-    <section class="native-preview-controls" aria-label="Image preview demo controls">
-      <div>
-        <span class="implementation-label">Active implementation</span>
-        <strong id="implementationBadge" class="implementation-badge">Detecting...</strong>
-      </div>
-      <label class="preview-delay-control">
-        Preview delay
-        <select id="previewDelaySelect">
-          <option value="1000">1 second</option>
-          <option value="1500" selected>1.5 seconds</option>
-          <option value="2500">2.5 seconds</option>
+    <section class="gallery-toolbar" aria-label="Gallery preview controls">
+      <label class="gallery-format-control" for="previewFormatSelect">
+        Preview format
+        <select id="previewFormatSelect">
+          <option value="blurhash">BlurHash</option>
+          <option value="thumbhash">ThumbHash</option>
+          <option value="lqip">LQIP / blur-up</option>
+          <option value="avif">Inline AVIF</option>
         </select>
       </label>
-      <button id="reloadPreviewsButton" type="button">Reload Final Images</button>
-    </section>
-
-    <section class="hash-comparison" aria-labelledby="hash-comparison-heading">
-      <div class="section-heading">
-        <h2 id="hash-comparison-heading">Hash decoding comparison</h2>
-        <p>Both columns use the same values from <code>photos.json</code>.</p>
+      <div class="gallery-implementation">
+        <span>Preview engine</span>
+        <strong id="implementationBadge" class="implementation-badge">Detecting...</strong>
       </div>
-
-      <article class="hash-comparison-row" aria-labelledby="blurhash-comparison-heading">
-        <h2 id="blurhash-comparison-heading">BlurHash</h2>
-        <p class="hash-source"><code id="blurHashValue">Loading manifest value...</code></p>
-        <div class="hash-comparison-columns">
-          <section class="native-preview-card" aria-labelledby="blurhash-js-heading">
-            <h3 id="blurhash-js-heading"><code>previewsrc</code>: JavaScript-decoded raster</h3>
-            <div class="native-preview-frame">
-              <img
-                id="blurHashJsPreview"
-                alt="Forest trail using a JavaScript-decoded BlurHash raster preview"
-                width="1536"
-                height="1024"
-              />
-            </div>
-            <p id="blurHashJsStatus" class="status">Preparing raster preview...</p>
-          </section>
-
-          <section class="native-preview-card" aria-labelledby="blurhash-native-heading">
-            <h3 id="blurhash-native-heading"><code>previewsrc</code>: Native hash</h3>
-            <div class="native-preview-frame">
-              <img
-                id="blurHashNativePreview"
-                alt="Forest trail using a native BlurHash preview"
-                width="1536"
-                height="1024"
-              />
-            </div>
-            <p id="blurHashNativeStatus" class="status">Preparing encoded hash preview...</p>
-            <p class="native-preview-syntax"><code>data:application/x-blurhash,...</code></p>
-          </section>
-        </div>
-      </article>
-
-      <article class="hash-comparison-row" aria-labelledby="thumbhash-comparison-heading">
-        <h2 id="thumbhash-comparison-heading">ThumbHash</h2>
-        <p class="hash-source"><code id="thumbHashValue">Loading manifest value...</code></p>
-        <div class="hash-comparison-columns">
-          <section class="native-preview-card" aria-labelledby="thumbhash-js-heading">
-            <h3 id="thumbhash-js-heading"><code>previewsrc</code>: JavaScript-decoded raster</h3>
-            <div class="native-preview-frame">
-              <img
-                id="thumbHashJsPreview"
-                alt="City skyline using a JavaScript-decoded ThumbHash raster preview"
-                width="1536"
-                height="1024"
-              />
-            </div>
-            <p id="thumbHashJsStatus" class="status">Preparing raster preview...</p>
-          </section>
-
-          <section class="native-preview-card" aria-labelledby="thumbhash-native-heading">
-            <h3 id="thumbhash-native-heading"><code>previewsrc</code>: Native hash</h3>
-            <div class="native-preview-frame">
-              <img
-                id="thumbHashNativePreview"
-                alt="City skyline using a native ThumbHash preview"
-                width="1536"
-                height="1024"
-              />
-            </div>
-            <p id="thumbHashNativeStatus" class="status">Preparing encoded hash preview...</p>
-            <p class="native-preview-syntax"><code>data:application/x-thumbhash;base64,...</code></p>
-          </section>
-        </div>
-      </article>
+      <button id="reloadGalleryButton" type="button">Reload previews</button>
     </section>
 
-    <section class="native-preview-examples" aria-labelledby="standard-examples-heading">
-      <div class="section-heading">
-        <h2 id="standard-examples-heading">Standard image previews</h2>
-        <p>These inputs work with either the native API or the standard-image polyfill.</p>
-      </div>
-      <div class="native-preview-grid">
-      <article class="native-preview-card">
-        <h2>External image URL</h2>
-        <div class="native-preview-frame">
-          <img
-            id="externalPreviewImage"
-            previewsrc="./images/mountains.webp"
-            alt="Night landscape, previewed by a mountain image"
-            width="1536"
-            height="1024"
-          />
-        </div>
-        <p class="status" data-status-for="externalPreviewImage">Loading final image...</p>
-        <dl class="native-preview-details">
-          <div><dt>API</dt><dd><code>previewsrc</code> attribute</dd></div>
-          <div><dt>Preview</dt><dd><code>./images/mountains.webp</code></dd></div>
-          <div><dt>Final</dt><dd><code>./images/night-mood.jpg</code></dd></div>
-        </dl>
-      </article>
-
-      <article class="native-preview-card">
-        <h2>Inline image data URL</h2>
-        <div class="native-preview-frame">
-          <img
-            id="inlinePreviewImage"
-            alt="Beach scene with an inline JPEG preview"
-            width="1536"
-            height="1024"
-          />
-        </div>
-        <p class="status" data-status-for="inlinePreviewImage">Preparing inline JPEG preview...</p>
-        <dl class="native-preview-details">
-          <div><dt>API</dt><dd><code>image.previewSrc</code> property</dd></div>
-          <div><dt>Preview</dt><dd><code>data:image/jpeg;base64,...</code></dd></div>
-          <div><dt>Final</dt><dd><code>./images/beach.png</code></dd></div>
-        </dl>
-      </article>
-      </div>
+    <section class="gallery-summary" aria-live="polite">
+      <p id="galleryStatus">Loading photo manifest...</p>
+      <strong id="photoCount">0 photos</strong>
     </section>
 
-    <section class="native-preview-note" aria-labelledby="demo-notes-heading">
-      <h2 id="demo-notes-heading">Try the loading state</h2>
-      <p>
-        Enable network throttling and disable the browser cache, then use
-        <strong>Reload Final Images</strong>. This API version performs a direct preview-to-final
-        replacement and does not add View Transition behavior.
-      </p>
-    </section>
+    <section id="photoGallery" class="photo-gallery" aria-label="Photo preview gallery" aria-busy="true"></section>
   </main>
 
   <script type="module" src="./native-image-preview.js"></script>

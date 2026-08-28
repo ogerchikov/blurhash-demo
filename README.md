@@ -97,25 +97,22 @@ python -m http.server 8080
 
 Then navigate to the local URL shown by your server.
 
-### Native Image Preview API Demo
+### Native Image Preview Gallery
 
-Open `native-image-preview.html` to compare the supported standard preview resource forms:
+Open `native-image-preview.html` for a responsive gallery of every image listed in `photos.json`.
+Each card preserves the photo dimensions from the manifest and uses a real `<img>` with
+`previewsrc`. A labeled selector applies one preview format to the entire gallery:
 
-- An external standard image URL supplied with the `previewsrc` attribute
-- An inline JPEG data URL supplied through the `HTMLImageElement.previewSrc` property
+- BlurHash using `data:application/x-blurhash,...`
+- ThumbHash using `data:application/x-thumbhash;base64,...`
+- LQIP / blur-up using the manifest's inline image data URL
+- Inline AVIF using the manifest's AVIF preview data URL
 
-The page detects `HTMLImageElement.prototype.previewSrc` before its image markup is parsed. Browsers
-with the API use their native implementation; other browsers load `image-preview-polyfill.js`.
-
-The page also compares BlurHash and ThumbHash in two adjacent `previewsrc` image columns. The
-JavaScript side uses the same decoder libraries and `photos.json` values as the main comparison,
-converts the decoded pixels to a PNG data URL, and supplies that raster through `previewsrc`. The
-native side supplies encoded `application/x-blurhash` and `application/x-thumbhash` data URLs
-directly through `previewsrc` without application-level decoding. Browsers with the native API
-decode those formats natively; otherwise the polyfill imports the shared hash utilities, converts
-the hash to an internal PNG data URL, and uses the same preview lifecycle as standard images. The
-replay control holds previews before assigning the corresponding final image sources. This initial
-API and polyfill demo intentionally excludes View Transition behavior.
+Changing the format automatically replays the gallery, and **Reload previews** repeats the selected
+preview with cache-busted final image requests. Previews remain visible for a short fixed delay
+before final `src` values are assigned. The page prefers a native
+`HTMLImageElement.previewSrc` implementation and loads `image-preview-polyfill.js` only when the
+native API is absent. No View Transition behavior is used.
 
 ## Precompute `photos.json`
 

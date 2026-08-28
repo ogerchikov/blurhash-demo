@@ -1,165 +1,213 @@
-import {
-  base64ToBytes,
-  blurhashToRasterDataUrl,
-  thumbhashToRasterDataUrl,
-} from "./image-hash-utils.js";
+const PREVIEW_DURATION_MS = 2500;
 
+const formatSelect = document.getElementById("previewFormatSelect");
+const reloadButton = document.getElementById("reloadGalleryButton");
 const implementationBadge = document.getElementById("implementationBadge");
-const reloadButton = document.getElementById("reloadPreviewsButton");
-const previewDelaySelect = document.getElementById("previewDelaySelect");
-const externalImage = document.getElementById("externalPreviewImage");
-const inlineImage = document.getElementById("inlinePreviewImage");
+const galleryStatus = document.getElementById("galleryStatus");
+const photoCount = document.getElementById("photoCount");
+const gallery = document.getElementById("photoGallery");
 
-const replayEntries = [
-  {
-    image: externalImage,
-    finalSrc: "./images/night-mood.jpg",
-    status: document.querySelector('[data-status-for="externalPreviewImage"]'),
-    previewDescription: "Standard image preview",
+const formats = {
+  blurhash: {
+    label: "BlurHash",
+    getPreview(record) {
+      return record.blurhash
+        ? `data:application/x-blurhash,${encodeURIComponent(record.blurhash)}`
+        : "";
+    },
   },
-  {
-    image: inlineImage,
-    finalSrc: "./images/beach.png",
-    status: document.querySelector('[data-status-for="inlinePreviewImage"]'),
-    previewDescription: "Inline raster preview",
+  thumbhash: {
+    label: "ThumbHash",
+    getPreview(record) {
+      return record.thumbhashBase64
+        ? `data:application/x-thumbhash;base64,${record.thumbhashBase64}`
+        : "";
+    },
   },
-];
+  lqip: {
+    label: "LQIP / blur-up",
+    getPreview(record) {
+      return record.lqip?.dataUrl || "";
+    },
+  },
+  avif: {
+    label: "Inline AVIF",
+    getPreview(record) {
+      return record.avif?.dataUrl || "";
+    },
+  },
+};
+
+let entries = [];
 let replayTimer;
+let replayId = 0;
+let loadedImages = new Set();
 
-function reloadFinalImages() {
-  clearTimeout(replayTimer);
-  const cacheKey = `preview-demo=${Date.now()}`;
-  const delay = Number(previewDelaySelect.value);
+const requestedFormat = new URL(window.location.href).searchParams.get("preview");
+if (requestedFormat in formats) {
+  formatSelect.value = requestedFormat;
+}
 
-  for (const { image, status, previewDescription } of replayEntries) {
-    image.removeAttribute("src");
-    status.textContent = `${previewDescription} shown for ${delay / 1000} seconds`;
+function photoName(src) {
+  const filename = src.split("/").pop().replace(/\.[^.]+$/, "");
+  return filename
+    .split(/[-_]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function createGalleryEntry(record) {
+  const card = document.createElement("article");
+  card.className = "photo-card";
+
+  const frame = document.createElement("div");
+  frame.className = "photo-card-frame";
+  if (record.width > 0 && record.height > 0) {
+    frame.style.aspectRatio = `${record.width} / ${record.height}`;
   }
 
-  replayTimer = setTimeout(() => {
-    for (const { image, finalSrc, status } of replayEntries) {
-      status.textContent = "Loading final image...";
-      const url = new URL(finalSrc, document.baseURI);
-      url.search = cacheKey;
-      image.src = url.href;
+  const image = document.createElement("img");
+  const name = photoName(record.src);
+  image.alt = name;
+  image.decoding = "async";
+  if (record.width > 0 && record.height > 0) {
+    image.width = record.width;
+    image.height = record.height;
+  }
+
+  const caption = document.createElement("div");
+  caption.className = "photo-card-caption";
+  const title = document.createElement("strong");
+  title.textContent = name;
+  const status = document.createElement("span");
+  status.textContent = "Preparing preview...";
+  caption.append(title, status);
+  frame.appendChild(image);
+  card.append(frame, caption);
+
+  const entry = { record, image, status };
+  image.addEventListener("load", () => {
+    if (!image.hasAttribute("src")) {
+      return;
     }
-  }, delay);
-}
-
-function addReplayEntry(image, finalSrc, status, previewDescription) {
-  replayEntries.push({ image, finalSrc, status, previewDescription });
-  image.addEventListener("load", () => {
-    status.textContent = "Final image loaded";
+    image.classList.remove("is-blur-up");
+    status.textContent = "Loaded";
+    loadedImages.add(entry);
+    galleryStatus.textContent = `${loadedImages.size} of ${entries.length} photos loaded`;
+    if (loadedImages.size === entries.length) {
+      gallery.setAttribute("aria-busy", "false");
+    }
   });
   image.addEventListener("error", () => {
+    if (!image.hasAttribute("src")) {
+      return;
+    }
+    image.classList.remove("is-blur-up");
     status.textContent = "Final image failed to load";
+    galleryStatus.textContent = "Some final images could not be loaded";
   });
+
+  return { card, entry };
 }
 
-for (const { image, status } of replayEntries) {
-  image.addEventListener("load", () => {
-    status.textContent = "Final image loaded";
-  });
-  image.addEventListener("error", () => {
-    status.textContent = "Final image failed to load";
-  });
+function configureAvailableFormats(records) {
+  for (const option of formatSelect.options) {
+    const format = formats[option.value];
+    const availableForEveryPhoto = records.every((record) => format.getPreview(record));
+    option.disabled = !availableForEveryPhoto;
+    option.hidden = !availableForEveryPhoto;
+  }
+
+  if (formatSelect.selectedOptions[0]?.disabled) {
+    const firstAvailable = Array.from(formatSelect.options).find((option) => !option.disabled);
+    if (firstAvailable) {
+      formatSelect.value = firstAvailable.value;
+    }
+  }
 }
 
-implementationBadge.textContent = window.imagePreviewDemo.implementation;
-implementationBadge.dataset.implementation = window.imagePreviewDemo.implementation.toLowerCase();
+function replayGallery() {
+  clearTimeout(replayTimer);
+  replayId += 1;
+  const currentReplayId = replayId;
+  const format = formats[formatSelect.value];
+  loadedImages = new Set();
+  gallery.setAttribute("aria-busy", "true");
 
-function makeBlurHashDataUrl(hash) {
-  return `data:application/x-blurhash,${encodeURIComponent(hash)}`;
+  for (const { record, image, status } of entries) {
+    image.removeAttribute("src");
+    const previewSrc = format.getPreview(record);
+    if (previewSrc) {
+      image.setAttribute("previewsrc", previewSrc);
+      image.classList.toggle("is-blur-up", formatSelect.value === "lqip");
+      status.textContent = `${format.label} preview`;
+    } else {
+      image.removeAttribute("previewsrc");
+      image.classList.remove("is-blur-up");
+      status.textContent = "Preview unavailable";
+    }
+  }
+
+  galleryStatus.textContent = `${entries.length} ${format.label} previews shown`;
+
+  replayTimer = setTimeout(() => {
+    if (currentReplayId !== replayId) {
+      return;
+    }
+
+    const cacheKey = `gallery-replay=${Date.now()}`;
+    for (const { record, image, status } of entries) {
+      status.textContent = "Loading full photo...";
+      const finalUrl = new URL(record.src, document.baseURI);
+      finalUrl.search = cacheKey;
+      image.src = finalUrl.href;
+    }
+  }, PREVIEW_DURATION_MS);
 }
 
-function makeThumbHashDataUrl(hash) {
-  return `data:application/x-thumbhash;base64,${hash}`;
-}
-
-function configureEncodedHashPreview({
-  imageId,
-  statusId,
-  previewUrl,
-  finalSrc,
-}) {
-  const image = document.getElementById(imageId);
-  const status = document.getElementById(statusId);
-
-  image.setAttribute("previewsrc", previewUrl);
-  addReplayEntry(
-    image,
-    finalSrc,
-    status,
-    `Encoded hash preview decoded by ${window.imagePreviewDemo.implementation}`,
-  );
-}
-
-try {
+async function initializeGallery() {
   const response = await fetch("./photos.json");
   if (!response.ok) {
     throw new Error(`photos.json request failed with status ${response.status}`);
   }
 
   const manifest = await response.json();
-  const beach = manifest.images.find((image) => image.src === "./images/beach.png");
-  const forest = manifest.images.find((image) => image.src === "./images/forest-trail.jpg");
-  const city = manifest.images.find((image) => image.src === "./images/city-skyline.jpg");
-  if (!beach?.lqip?.dataUrl?.startsWith("data:image/jpeg")) {
-    throw new Error("Beach JPEG LQIP is missing from photos.json");
-  }
-  if (!forest?.blurhash) {
-    throw new Error("Forest BlurHash is missing from photos.json");
-  }
-  if (!city?.thumbhashBase64) {
-    throw new Error("City ThumbHash is missing from photos.json");
+  const records = Array.isArray(manifest.images)
+    ? manifest.images.filter((record) => typeof record.src === "string")
+    : [];
+  if (records.length === 0) {
+    throw new Error("photos.json contains no images");
   }
 
-  inlineImage.previewSrc = beach.lqip.dataUrl;
-
-  const blurHashJsImage = document.getElementById("blurHashJsPreview");
-  const blurHashJsStatus = document.getElementById("blurHashJsStatus");
-  blurHashJsImage.previewSrc = blurhashToRasterDataUrl(forest.blurhash, 32, 21);
-  addReplayEntry(
-    blurHashJsImage,
-    forest.src,
-    blurHashJsStatus,
-    "JavaScript-decoded raster preview",
-  );
-  document.getElementById("blurHashValue").textContent = forest.blurhash;
-
-  const thumbHashJsImage = document.getElementById("thumbHashJsPreview");
-  const thumbHashJsStatus = document.getElementById("thumbHashJsStatus");
-  thumbHashJsImage.previewSrc = thumbhashToRasterDataUrl(base64ToBytes(city.thumbhashBase64));
-  addReplayEntry(
-    thumbHashJsImage,
-    city.src,
-    thumbHashJsStatus,
-    "JavaScript-decoded raster preview",
-  );
-  document.getElementById("thumbHashValue").textContent = city.thumbhashBase64;
-
-  configureEncodedHashPreview({
-    imageId: "blurHashNativePreview",
-    statusId: "blurHashNativeStatus",
-    previewUrl: makeBlurHashDataUrl(forest.blurhash),
-    finalSrc: forest.src,
+  configureAvailableFormats(records);
+  const fragment = document.createDocumentFragment();
+  entries = records.map((record) => {
+    const { card, entry } = createGalleryEntry(record);
+    fragment.appendChild(card);
+    return entry;
   });
-  configureEncodedHashPreview({
-    imageId: "thumbHashNativePreview",
-    statusId: "thumbHashNativeStatus",
-    previewUrl: makeThumbHashDataUrl(city.thumbhashBase64),
-    finalSrc: city.src,
-  });
-
-  reloadFinalImages();
-} catch (error) {
-  console.error(error);
-  for (const { status } of replayEntries) {
-    status.textContent = "Preview setup failed";
-  }
-  document.getElementById("blurHashJsStatus").textContent = "JavaScript decoding failed";
-  document.getElementById("thumbHashJsStatus").textContent = "JavaScript decoding failed";
-  reloadButton.disabled = true;
+  gallery.replaceChildren(fragment);
+  photoCount.textContent = `${entries.length} photos`;
+  replayGallery();
 }
 
-reloadButton.addEventListener("click", reloadFinalImages);
+implementationBadge.textContent = window.imagePreviewDemo.implementation;
+implementationBadge.dataset.implementation = window.imagePreviewDemo.implementation.toLowerCase();
+
+formatSelect.addEventListener("change", () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set("preview", formatSelect.value);
+  window.history.replaceState(null, "", url);
+  replayGallery();
+});
+reloadButton.addEventListener("click", replayGallery);
+
+try {
+  await initializeGallery();
+} catch (error) {
+  console.error(error);
+  gallery.setAttribute("aria-busy", "false");
+  galleryStatus.textContent = "The photo gallery could not be loaded.";
+  reloadButton.disabled = true;
+  formatSelect.disabled = true;
+}
