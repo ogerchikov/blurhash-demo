@@ -104,7 +104,11 @@ Changing the format automatically replays the gallery, and **Reload previews** r
 preview with cache-busted final image requests. Previews remain visible for a short fixed delay
 before final `src` values are assigned. The page prefers a native
 `HTMLImageElement.previewSrc` implementation and loads `image-preview-polyfill.js` only when the
-native API is absent. No View Transition behavior is used.
+native API is absent.
+
+The preview-engine badge reports **Native API** when `previewSrc` exists at page startup and
+**Polyfill** otherwise. `window.imagePreviewDemo.hasNativePreviewSource` records native support
+before the fallback can install its own `previewSrc` property.
 
 ## Precompute `photos.json`
 

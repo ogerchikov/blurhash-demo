@@ -1,543 +1,85 @@
-# Production image preview replacement patterns
-
-Date: 2026-08-20
-
-This is a reference for how real sites usually swap a preview image or placeholder with the final image. The goal is to capture the pattern rather than a single library-specific implementation.
-
-## Summary table
-
-| Format | Typical real-world usage | Major sites / references | Replacement pattern | Animation |
-|---|---|---|---|---|
-| BlurHash | Social feeds, media-heavy apps, feed cards | Mastodon, Pixelfed, BlurHash project | Decode hash to a tiny bitmap and replace the placeholder once the real image loads | Fade / crossfade, or canvas swap |
-| ThumbHash | App-level image previews, compact binary previews | ThumbHash demo, app pipelines | Decode compact hash into a tiny bitmap and swap to final image | Fade or instant replace |
-| LQIP / blur-up | Most CMS and CDN-driven sites | Unsplash, Next.js image demo, Cloudinary examples | Use a tiny blurred JPEG/WebP as the first image; replace with full image on load | Blur-to-sharp or fade |
-| AVIF / progressive delivery | Modern image CDN pipelines | Shopify, CNN-style publishers, Cloudinary-hosted media | Serve AVIF/WebP/JPEG using `<picture>` and lazy loading; placeholder is usually a color or blur-up | Fade or no explicit transition |
-| Color placeholder | Feed layouts, cards, skeleton-heavy pages | Next.js examples, large commerce sites | Show dominant color block while image is loading, then replace | Simple fade |
-| Shimmer / skeleton | Feeds, dashboard cards, commerce grids | Next.js examples, news sites, dashboards | Show shimmering background or skeleton while the real image is loading | Animated shimmer |
-
----
-
-## 1) BlurHash
-
-### Source site URL(s)
-- Mastodon public feed/media pages: https://mastodon.social/
-- Pixelfed image feeds: https://pixelfed.org/
-- BlurHash project reference page: https://blurha.sh/
-- Implementation reference: https://github.com/woltapp/blurhash
-
-### Observed markup pattern used to preview and replace
-Source site for this pattern: Mastodon and Pixelfed use the same fixed-slot, decoded-preview approach for media cards; the pattern is also documented on the BlurHash project page.
-
-The site keeps a fixed media box, renders a decoded BlurHash preview in a canvas or image slot, then swaps in the final image once it loads.
-
-```html
-<div class="media" style="aspect-ratio: 4 / 3;">
-  <canvas class="preview"></canvas>
-  <img class="full" src="/images/photo.jpg" alt="photo" hidden />
-</div>
-```
-
-```js
-const pixels = decodeBlurHash(blurhash, 32, 32);
-ctx.putImageData(new ImageData(pixels, 32, 32), 0, 0);
-
-fullImage.addEventListener('load', () => {
-  fullImage.classList.add('loaded');
-  previewCanvas.style.opacity = '0';
-  fullImage.hidden = false;
-});
-```
-
-### Animation on replacement
-- fade from placeholder to final image
-- blur-to-sharp transition
-- canvas replaced by image without layout shift
-
-### CSS positioning and animation
-This is the same fixed-slot pattern used in the Mastodon/Pixelfed media cards and the BlurHash project examples:
-
-```css
-.media {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-}
-
-.media .preview,
-.media .full {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.media .preview {
-  opacity: 1;
-  filter: blur(8px);
-  transition: opacity 260ms ease, filter 260ms ease;
-}
-
-.media .full {
-  opacity: 0;
-  filter: blur(8px);
-  transition: opacity 260ms ease, filter 260ms ease;
-}
-
-.media .full.loaded {
-  opacity: 1;
-  filter: blur(0);
-}
-```
-
----
-
-## 2) ThumbHash
-
-### Source site URL(s)
-- ThumbHash official demo / reference page: https://evanw.github.io/thumbhash/
-- ThumbHash project examples: https://github.com/evanw/thumbhash
-
-### Observed markup pattern used to preview and replace
-Source site for this pattern: the ThumbHash demo page shows the same fixed-frame decode-and-replace pattern; it is the clearest public example of the technique.
-
-The app keeps a fixed-size frame, decodes the ThumbHash to an RGBA bitmap, and swaps the bitmap for the real image when the full asset loads.
-
-```html
-<div class="thumb-media">
-  <canvas class="preview"></canvas>
-  <img class="real" src="/images/large.jpg" alt="" />
-</div>
-```
-
-```js
-const thumb = base64ToBytes(thumbhashBase64);
-const rgba = thumbHashToRGBA(thumb);
-const imageData = new ImageData(new Uint8ClampedArray(rgba), 100, 100);
-previewCtx.putImageData(imageData, 0, 0);
-
-realImg.onload = () => {
-  realImg.classList.add('loaded');
-  previewCanvas.style.opacity = 0;
-};
-```
-
-### Animation on replacement
-- usually opacity fade
-- sometimes no explicit transition
-
-### CSS positioning and animation
-This follows the ThumbHash demo pattern: fixed frame, decoded bitmap, then final image fades in.
-
-```css
-.thumb-media {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-}
-
-.thumb-media canvas,
-.thumb-media img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.thumb-media canvas {
-  opacity: 1;
-  transition: opacity 220ms ease;
-}
-
-.thumb-media img {
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
-
-.thumb-media img.loaded {
-  opacity: 1;
-}
-```
-
----
-
-## 3) LQIP / blur-up
-
-### Source site URL(s)
-- Unsplash image cards and feed pages: https://unsplash.com/
-- Next.js image placeholder demo: https://image-component.nextjs.gallery/placeholder
-- Cloudinary blur-up and progressive image examples: https://cloudinary.com/documentation/image_optimization
-
-### Observed markup pattern used to preview and replace
-Source site for this pattern: this is the standard blur-up pattern used by Unsplash and demonstrated in the Next.js image placeholder gallery; the same pattern is common across CMS and CDN-driven image sites.
-
-The site uses a tiny blurred preview image in the same slot as the final image, then swaps the final image in on load.
-
-```html
-<img class="preview" src="/images/photo-blur.jpg" alt="photo" />
-<img class="full" src="/images/photo.jpg" alt="photo" loading="lazy" />
-```
-
-```js
-const full = document.querySelector('.full');
-const preview = document.querySelector('.preview');
-
-full.addEventListener('load', () => {
-  full.classList.add('loaded');
-  preview.style.opacity = '0';
-});
-```
-
-### Animation on replacement
-- blur-to-sharp effect
-- fade opacity transition
-- often a slight scale-up on the preview before the final image becomes visible
-
-### CSS positioning and animation
-This matches the Unsplash + Next.js blur-up examples: preview and full image share the same container and the final image fades in after load.
-
-```css
-.preview,
-.full {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.preview {
-  filter: blur(12px);
-  transform: scale(1.04);
-  transition: opacity 260ms ease, filter 260ms ease;
-}
-
-.full {
-  opacity: 0;
-  filter: blur(12px);
-  transition: opacity 260ms ease, filter 260ms ease;
-}
-
-.full.loaded {
-  opacity: 1;
-  filter: blur(0);
-}
-```
-
----
-
-## 4) AVIF / progressive format delivery
-
-### Source site URL(s)
-- Shopify storefront and product media: https://shopify.com/
-- Cloudinary product and media optimization examples: https://cloudinary.com/
-- MDN image-format reference: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
-
-### Observed markup pattern used to preview and replace
-Source site for this pattern: Shopify and Cloudinary media examples both use the same `<picture>` + fallback + placeholder approach for progressive image delivery.
-
-AVIF is served via a `<picture>` source chain, usually together with a temporary placeholder or a blur-up layer while the browser resolves the best source.
-
-```html
-<picture>
-  <source srcset="/images/photo.avif" type="image/avif" />
-  <source srcset="/images/photo.webp" type="image/webp" />
-  <img src="/images/photo.jpg" alt="photo" />
-</picture>
-```
-
-```html
-<div class="media">
-  <div class="placeholder"></div>
-  <picture>
-    <source srcset="/images/photo.avif" type="image/avif" />
-    <source srcset="/images/photo.webp" type="image/webp" />
-    <img src="/images/photo.jpg" alt="photo" />
-  </picture>
-</div>
-```
-
-```js
-const img = document.querySelector('.media img');
-const placeholder = document.querySelector('.media .placeholder');
-
-img.addEventListener('load', () => {
-  img.classList.add('loaded');
-  placeholder.style.opacity = '0';
-});
-```
-
-### Animation on replacement
-- usually a subtle fade
-- sometimes no explicit transition
-
-### CSS positioning and animation
-This follows the Shopify and Cloudinary progressive-delivery pattern: the placeholder sits in the same media box and the chosen AVIF/WebP/JPEG source fades in.
-
-```css
-.media {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-}
-
-.media .placeholder,
-.media picture,
-.media img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.media .placeholder {
-  background: linear-gradient(135deg, #c7d2fe, #f5d0fe);
-  opacity: 1;
-  transition: opacity 220ms ease;
-}
-
-.media img {
-  opacity: 0;
-  filter: blur(8px);
-  transition: opacity 220ms ease, filter 220ms ease;
-}
-
-.media img.loaded {
-  opacity: 1;
-  filter: blur(0);
-}
-```
-
----
-
-## 5) Dominant color placeholder
-
-### Source site URL(s)
-- Next.js color placeholder demo: https://image-component.nextjs.gallery/color
-- Major card-based commerce and media layouts that use solid-color previews before final media loads
-
-### Observed markup pattern used to preview and replace
-Source site for this pattern: the Next.js color placeholder demo uses the same swatch-then-fade pattern, and it is common across card-based commerce and media layouts.
-
-The page reserves a media box, shows a solid-color swatch, and fades in the final image when it becomes available.
-
-```html
-<div class="card-image">
-  <div class="swatch" style="background:#c99d7c"></div>
-  <img src="/images/large.jpg" alt="" />
-</div>
-```
-
-```css
-.swatch {
-  position: absolute;
-  inset: 0;
-  background: #c99d7c;
-}
-
-.card-image img {
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.card-image img.loaded {
-  opacity: 1;
-}
-```
-
-```js
-const img = document.querySelector('.card-image img');
-const swatch = document.querySelector('.card-image .swatch');
-
-img.addEventListener('load', () => {
-  img.classList.add('loaded');
-  swatch.style.opacity = '0';
-});
-```
-
-### Animation on replacement
-- simple fade
-- sometimes instant replace with no animation
-
-### CSS positioning and animation
-This is the same swatch-then-fade pattern used in the Next.js color-placeholder demo.
-
-```css
-.card-image {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-}
-
-.card-image .swatch,
-.card-image img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-image .swatch {
-  background: #c99d7c;
-}
-
-.card-image img {
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.card-image img.loaded {
-  opacity: 1;
-}
-```
-
----
-
-## 6) Shimmer / skeleton placeholder
-
-### Source site URL(s)
-- Next.js shimmer placeholder demo: https://image-component.nextjs.gallery/shimmer
-- Feed-heavy news and ecommerce sites that use skeleton/image-card loading states
-
-### Observed markup pattern used to preview and replace
-Source site for this pattern: the Next.js shimmer demo shows this exact skeleton/gradient loading pattern, and it is widely used in feed-heavy news and ecommerce interfaces.
-
-The site reserves the media area, renders a shimmer skeleton or gradient block, and then fades in the final image when the asset is ready.
-
-```html
-<div class="media skeleton">
-  <img src="/images/large.jpg" alt="" />
-</div>
-```
-
-```js
-const media = document.querySelector('.media');
-const img = document.querySelector('.media img');
-
-img.addEventListener('load', () => {
-  media.classList.remove('skeleton');
-  img.classList.add('loaded');
-});
-```
-
-```css
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e5e7eb 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite linear;
-}
-```
-
-### Animation on replacement
-- animated shimmer while loading
-- final image fades in after loading
-
-### CSS positioning and animation
-This is the same skeleton/gradient approach shown in the Next.js shimmer demo and used in feed-heavy news and ecommerce interfaces.
-
-```css
-.media {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-}
-
-.media.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e5e7eb 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite linear;
-}
-
-.media img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
-
-.media img.loaded {
-  opacity: 1;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-```
-
----
-
-## Shared production pattern across all formats
-
-The real site pattern is usually not format-specific. It is this structure:
-
-1. Reserve a fixed-size container.
-2. Set a stable `aspect-ratio` or fixed height.
-3. Show a cheap placeholder immediately.
-4. Load the full image in the background.
-5. Replace the placeholder with the final image.
-6. Fade, blur, or transform the image for a smoother transition.
-
-Common HTML/CSS pattern:
-
-```html
-<div class="media" style="aspect-ratio: 16 / 9;">
-  <img class="preview" src="tiny-preview.jpg" alt="" />
-  <img class="final" src="large.jpg" alt="" loading="lazy" />
-</div>
-```
-
-```css
-.media {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-}
-
-.preview,
-.final {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.preview {
-  filter: blur(10px);
-  transform: scale(1.04);
-}
-
-.final {
-  opacity: 0;
-  transition: opacity 250ms ease, filter 250ms ease;
-  filter: blur(0);
-}
-
-.final.loaded {
-  opacity: 1;
-}
-```
-
----
-
-## Recommendation for this demo
-
-If the goal is to compare real production techniques, the best practical set is:
-
-- BlurHash
-- ThumbHash
-- LQIP / blur-up
-- AVIF picture-source delivery
-- Dominant-color placeholder
-- Shimmer placeholder
-
-That set covers the main actual replacement patterns used on the web today.
+# Production image preview patterns
+
+Date: 2026-09-06
+
+This report summarizes image-preview techniques verified on real sites or in
+production application source. A site is listed as a live example only when a
+specific public page was observed exercising the technique. Source-level
+examples are listed separately when no stable, public demonstration URL was
+verified.
+
+## Live, verified examples
+
+| Site and demonstration URL | Framework or library | Preview format | Usage pattern |
+| --- | --- | --- | --- |
+| [Unsplash](https://unsplash.com/) | Custom image component | Inline base64-encoded 8x8 BMP | The final `<img>` has the preview as its CSS `background-image`. The selected `src` or `srcset` image paints over the background when available. |
+| [Next.js image placeholder demo](https://image-component.nextjs.gallery/placeholder) | Next.js `<Image>` | Tiny JPEG embedded in an inline SVG | The generated SVG is the CSS background of the final `<img>`. Next.js removes the background after the final image loads and decoding settles. |
+| [Next.js color demo](https://image-component.nextjs.gallery/color) | Next.js `<Image>` | Blurred 1x1 GIF | The GIF is the final `<img>` element's CSS background. It provides a color placeholder rather than a preview of recognizable image content. |
+| [Next.js shimmer demo](https://image-component.nextjs.gallery/shimmer) | Next.js `<Image>` | Animated SVG | The SVG is a CSS background loading indicator on the final `<img>`, not a preview representation of the final image. |
+| [Cico Jazz Orchester hero](https://cicojazz.de/#hero) | Cloudinary HTML SDK (`@cloudinary/html`) | Cloudinary predominant-color transformation | Cloudinary's `placeholder({ mode: "predominant-color" })` plugin first assigns a transformed placeholder URL to one `<img>`, preloads the final responsive image, and then replaces the element's `src`. |
+| [Cloudinary React SDK training tool](https://cloudinary-training.github.io/cld-intro-react-sdk-training-tool/#/placeholder) | React and `@cloudinary/react` `AdvancedImage` | Cloudinary blurred-image transformation | The example applies `placeholder({ mode: "blur" })`. Press **Run** in the embedded editor to execute it. The plugin replaces the source of one image rather than stacking two image elements. |
+| [Minds post](https://www.minds.com/newsfeed/1565424642032668690) | Minds web client | BlurHash decoded to canvas | A decoded canvas is displayed with the final `<img>`. After the image loads, the canvas fades out over approximately 300 ms and is removed. |
+
+Supporting source:
+
+- [Next.js placeholder demo source](https://github.com/vercel/next.js/blob/canary/examples/image-component/app/placeholder/page.tsx)
+- [Cloudinary HTML placeholder plugin](https://github.com/cloudinary/frontend-frameworks/blob/9a05f3571fec1a3d0ecc66a899db1833d326c094/packages/html/src/plugins/placeholder.ts#L10-L108)
+- [Cico Jazz Cloudinary setup](https://github.com/LeoGanz/CJO_Website/blob/64731c8ba37b664aa2dc57de08c534357f6297c3/src/scripts/images.ts#L24-L38)
+- [Cloudinary training example](https://github.com/cloudinary-training/cld-intro-react-sdk-training-tool/blob/29006ba52bdc2897cbd5af5999bae7b6f0cac4ee/src/components/PlaceholderPlugin.js#L6-L19)
+
+## Production-source examples without a stable public demonstration URL
+
+These applications contain production preview implementations, but the
+relevant UI may require authentication, a configured server, uploaded media,
+or a temporary deployment. Their inclusion does not claim that every image in
+the product uses the technique.
+
+| Product | Framework or library | Preview format | Usage pattern |
+| --- | --- | --- | --- |
+| Mastodon | React | BlurHash decoded to canvas | Some media components stack a decoded canvas with the final image and hide the canvas after loading. The path used depends on the component and server configuration. |
+| Misskey | Vue | BlurHash decoded in a worker | A worker decodes the hash into a canvas. The canvas is replaced after the final image completes `decode()`; user preferences can control use of the preview. |
+| Nextcloud Photos | Vue | BlurHash, small thumbnail, and larger preview | The image component can progress through several layers: BlurHash, a small thumbnail, a larger preview, and the final image. |
+| Nextcloud Talk | Vue | BlurHash decoded to canvas | A canvas remains visible while a server-generated file preview loads. |
+| Jellyfin Vue | Vue | BlurHash decoded in a worker | The decoded canvas occupies the image component's placeholder slot until the final image is ready. |
+| Jesus Film Next Steps | Next.js | BlurHash converted to a WebP data URL | The application converts BlurHash output to WebP and supplies it to Next.js as `blurDataURL`; Next.js manages display and removal of the placeholder. |
+
+Supporting source:
+
+- [Mastodon BlurHash component](https://github.com/mastodon/mastodon/blob/main/app/javascript/mastodon/components/blurhash.tsx)
+- [Mastodon media gallery](https://github.com/mastodon/mastodon/blob/main/app/javascript/mastodon/components/media_gallery.jsx)
+
+## Reference demonstrations
+
+Reference projects demonstrate decoding formats but should not be described as
+production image-loading examples:
+
+| Demonstration | Format | Observed behavior |
+| --- | --- | --- |
+| [BlurHash](https://blurha.sh/) | BlurHash | The hero stacks decoded canvases and images, but cycles image opacity as a demonstration rather than handing off when an image finishes loading. |
+| [ThumbHash](https://evanw.github.io/thumbhash/) | ThumbHash | The comparison page renders decoded output as generated PNG data URLs or canvases. It does not demonstrate a preview-to-final loading lifecycle. |
+
+## Recurring implementation patterns
+
+1. **CSS background on the final `<img>`:** Unsplash and the Next.js demos avoid a second preview element. Final image content covers the background, and framework code may later remove it.
+2. **Source replacement on one `<img>`:** Cloudinary first assigns a transformed placeholder URL, preloads the final resource, and replaces `src`.
+3. **Decoded canvas stacked with the final image:** Minds, Mastodon, Misskey, Nextcloud, and Jellyfin decode BlurHash into a separate canvas and coordinate its removal with image loading or decoding.
+4. **Compact hash converted to a conventional image URL:** Jesus Film Next Steps converts BlurHash to a WebP data URL and delegates the lifecycle to Next.js.
+5. **Non-content loading placeholders:** Dominant-color and shimmer backgrounds cover the same loading period but do not provide recognizable preview content.
+
+Across these patterns, custom implementations must coordinate sizing,
+decoding, source changes, loading or `decode()` completion, transitions,
+cancellation, and cleanup. The duplicated lifecycle logic is separate from the
+preview format itself.
+
+## Claims not established by this review
+
+- An API response containing a `blur_hash` field does not prove that the
+  corresponding website renders BlurHash.
+- A package dependency does not prove that a deployed page exercises its
+  placeholder feature.
+- No per-image preview was verified on the Pixelfed marketing site.
+- Responsive images were observed on Shopify and Cloudinary pages, but their
+  use did not establish a loading-preview implementation.
+- No live official Cloudinary-owned product page was verified as directly
+  executing the exact HTML placeholder plugin. The Cloudinary training site is
+  an interactive SDK example.

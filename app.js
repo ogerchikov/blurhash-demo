@@ -127,6 +127,33 @@ function makeShimmerImageNode(dataUrl) {
   return image;
 }
 
+function createTransitionGuard(viewport, placeholderNode) {
+  const guard = document.createElement("div");
+  const rect = viewport.getBoundingClientRect();
+  let previewClone;
+
+  if (placeholderNode instanceof HTMLCanvasElement) {
+    previewClone = placeholderNode.cloneNode();
+    previewClone.width = placeholderNode.width;
+    previewClone.height = placeholderNode.height;
+    previewClone.getContext("2d").drawImage(placeholderNode, 0, 0);
+  } else {
+    previewClone = placeholderNode.cloneNode(true);
+  }
+
+  guard.className = "view-transition-guard";
+  guard.setAttribute("aria-hidden", "true");
+  guard.style.left = `${rect.left}px`;
+  guard.style.top = `${rect.top}px`;
+  guard.style.width = `${rect.width}px`;
+  guard.style.height = `${rect.height}px`;
+  guard.appendChild(previewClone);
+  document.body.appendChild(guard);
+
+  guard.addEventListener("transitionend", () => guard.remove(), { once: true });
+  return guard;
+}
+
 function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtNode) {
   const viewport = placeholderNode.parentElement;
   if (!viewport) {
@@ -141,7 +168,6 @@ function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtN
 
   const replacePreview = () => {
     placeholderNode.replaceWith(image);
-    updateShownStatus();
   };
 
   if (
@@ -149,10 +175,39 @@ function revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtN
     && !state.prefersReducedMotion
     && typeof viewport.startViewTransition === "function"
   ) {
-    viewport.startViewTransition(replacePreview);
-  } else {
+    const guard = createTransitionGuard(viewport, placeholderNode);
+    const transition = viewport.startViewTransition(replacePreview);
+    transition.ready.then(() => {
+      updateShownStatus();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => guard.classList.add("is-hidden"));
+      });
+    }, () => {
+      guard.remove();
+      updateShownStatus();
+    });
+    transition.finished.then(() => guard.remove());
+  } else if (state.prefersReducedMotion) {
     replacePreview();
+    updateShownStatus();
+  } else {
+    image.classList.add("full-image-enter");
+    viewport.appendChild(image);
+    placeholderNode.classList.add("placeholder-exit");
+
+    image.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      image.classList.add("is-visible");
+    });
+
+    image.addEventListener("transitionend", () => placeholderNode.remove(), { once: true });
+    updateShownStatus();
   }
+}
+
+async function revealLoadedImage(image, placeholderNode, startedAt, statusNode, shownAtNode) {
+  await image.decode();
+  revealFullImage(placeholderNode, image, startedAt, statusNode, shownAtNode);
 }
 
 function updateDelayLabel() {
@@ -986,8 +1041,8 @@ async function runComparison() {
       const image = new Image();
       image.onload = () => {
         setTimeout(() => {
-          revealFullImage(blurCanvas, image, start, blurhashStatus, blurhashShownMs);
-          resolve();
+          revealLoadedImage(image, blurCanvas, start, blurhashStatus, blurhashShownMs)
+            .then(resolve, reject);
         }, swapDelayMs);
       };
       image.onerror = () => reject(new Error("BlurHash image load failed"));
@@ -1000,8 +1055,8 @@ async function runComparison() {
       const image = new Image();
       image.onload = () => {
         setTimeout(() => {
-          revealFullImage(thumbCanvas, image, start, thumbhashStatus, thumbhashShownMs);
-          resolve();
+          revealLoadedImage(image, thumbCanvas, start, thumbhashStatus, thumbhashShownMs)
+            .then(resolve, reject);
         }, swapDelayMs);
       };
       image.onerror = () => reject(new Error("ThumbHash image load failed"));
@@ -1014,8 +1069,8 @@ async function runComparison() {
       const image = new Image();
       image.onload = () => {
         setTimeout(() => {
-          revealFullImage(lqipPreview, image, start, lqipStatus, lqipShownMs);
-          resolve();
+          revealLoadedImage(image, lqipPreview, start, lqipStatus, lqipShownMs)
+            .then(resolve, reject);
         }, swapDelayMs);
       };
       image.onerror = () => reject(new Error("LQIP image load failed"));
@@ -1028,8 +1083,8 @@ async function runComparison() {
       const image = new Image();
       image.onload = () => {
         setTimeout(() => {
-          revealFullImage(avifPreview, image, start, avifStatus, avifShownMs);
-          resolve();
+          revealLoadedImage(image, avifPreview, start, avifStatus, avifShownMs)
+            .then(resolve, reject);
         }, swapDelayMs);
       };
       image.onerror = () => reject(new Error("AVIF image load failed"));
@@ -1042,8 +1097,8 @@ async function runComparison() {
       const image = new Image();
       image.onload = () => {
         setTimeout(() => {
-          revealFullImage(colorPreview, image, start, colorStatus, colorShownMs);
-          resolve();
+          revealLoadedImage(image, colorPreview, start, colorStatus, colorShownMs)
+            .then(resolve, reject);
         }, swapDelayMs);
       };
       image.onerror = () => reject(new Error("Color placeholder image load failed"));
@@ -1056,8 +1111,8 @@ async function runComparison() {
       const image = new Image();
       image.onload = () => {
         setTimeout(() => {
-          revealFullImage(shimmerPreview, image, start, shimmerStatus, shimmerShownMs);
-          resolve();
+          revealLoadedImage(image, shimmerPreview, start, shimmerStatus, shimmerShownMs)
+            .then(resolve, reject);
         }, swapDelayMs);
       };
       image.onerror = () => reject(new Error("Shimmer placeholder image load failed"));

@@ -197,10 +197,6 @@ body {
   display: block;
 }
 
-.viewport > * {
-  view-transition-name: preview-image;
-}
-
 .lqip-preview {
   filter: blur(10px);
   transform: scale(1.04);
@@ -211,31 +207,77 @@ body {
   inset: 0;
 }
 
-@keyframes scoped-preview-exit {
-  to {
-    opacity: 0;
-    transform: scale(0.99);
-  }
+.full-image-enter {
+  opacity: 0;
+  transform: scale(1.02);
+  transition:
+    opacity 360ms ease-out,
+    transform 500ms ease-out;
+}
+
+.full-image-enter.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.placeholder-exit {
+  opacity: 0;
+  transform: scale(0.99);
+  transition:
+    opacity 360ms ease-out,
+    transform 500ms ease-out;
 }
 
 @keyframes scoped-preview-enter {
   from {
     opacity: 0;
-    transform: scale(1.02);
   }
 }
 
-.viewport::view-transition-old(preview-image) {
-  animation: 500ms ease-out both scoped-preview-exit;
+.viewport::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
-.viewport::view-transition-new(preview-image) {
+.viewport::view-transition-new(root) {
   animation: 500ms ease-out both scoped-preview-enter;
+  mix-blend-mode: normal;
+}
+
+.view-transition-guard {
+  position: fixed;
+  z-index: 1000;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #d9e0eb;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 50ms linear;
+}
+
+.view-transition-guard.is-hidden {
+  opacity: 0;
+}
+
+.view-transition-guard > * {
+  position: absolute;
+  inset: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  object-fit: cover;
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .viewport::view-transition-old(preview-image),
-  .viewport::view-transition-new(preview-image) {
+  .full-image-enter,
+  .placeholder-exit {
+    transition: none;
+  }
+
+  .viewport::view-transition-old(root),
+  .viewport::view-transition-new(root) {
     animation: none;
   }
 

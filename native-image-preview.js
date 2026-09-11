@@ -1,4 +1,6 @@
-import { galleryPreviewFormats as formats } from "./gallery-preview-formats.js";
+import {
+  galleryPreviewFormats as formats,
+} from "./gallery-preview-formats.js";
 
 const PREVIEW_DURATION_MS = 2500;
 
@@ -13,6 +15,15 @@ let entries = [];
 let replayTimer;
 let replayId = 0;
 let loadedImages = new Set();
+
+function updateImplementationBadge() {
+  const { hasNativePreviewSource } = window.imagePreviewDemo;
+  implementationBadge.textContent =
+    hasNativePreviewSource ? "Native API" : "Polyfill";
+  implementationBadge.title = hasNativePreviewSource
+    ? "The browser exposed previewSrc at page startup."
+    : "The browser did not expose previewSrc at page startup.";
+}
 
 const requestedFormat = new URL(window.location.href).searchParams.get("preview");
 if (requestedFormat in formats) {
@@ -56,12 +67,70 @@ function createGalleryEntry(record) {
   frame.appendChild(image);
   card.append(frame, caption);
 
-  const entry = { record, image, status };
-  image.addEventListener("load", () => {
+  const entry = {
+    record,
+    image,
+    status,
+    replayId: 0,
+    completionId: 0,
+    activeTransition: null,
+    finalLoadHandled: false,
+    failed: false,
+    transitionStartPromise: null,
+    resolveTransitionStart: null,
+  };
+  image.addEventListener("imagepreviewtransitionstart", (event) => {
+    const transition = event.detail?.transition;
+    if (transition) {
+      entry.activeTransition = transition;
+      entry.resolveTransitionStart?.(transition);
+      entry.resolveTransitionStart = null;
+    }
+  });
+  image.addEventListener("load", async () => {
     if (!image.hasAttribute("src")) {
       return;
     }
+    if (entry.finalLoadHandled) {
+      return;
+    }
+    entry.finalLoadHandled = true;
+
+    const currentReplayId = entry.replayId;
+    const { completionId } = entry;
     image.classList.remove("is-blur-up");
+    status.textContent = "Transitioning";
+
+    const transition = entry.activeTransition
+      || image.activeImagePreviewTransition
+      || await Promise.race([
+        entry.transitionStartPromise,
+        new Promise((resolve) => {
+          setTimeout(() => resolve(image.activeImagePreviewTransition), 50);
+        }),
+      ]);
+    if (transition) {
+      try {
+        await transition.finished;
+      } catch {
+        // A cancelled transition is handled by the replay identity checks below.
+      }
+    }
+
+    if (
+      entry.replayId !== currentReplayId
+      || replayId !== currentReplayId
+      || entry.completionId !== completionId
+      || !image.complete
+      || image.naturalWidth === 0
+      || entry.failed
+    ) {
+      return;
+    }
+
+    if (entry.activeTransition === transition) {
+      entry.activeTransition = null;
+    }
     status.textContent = "Loaded";
     loadedImages.add(entry);
     galleryStatus.textContent = `${loadedImages.size} of ${entries.length} photos loaded`;
@@ -73,6 +142,11 @@ function createGalleryEntry(record) {
     if (!image.hasAttribute("src")) {
       return;
     }
+    if (entry.finalLoadHandled) {
+      return;
+    }
+    entry.finalLoadHandled = true;
+    entry.failed = true;
     image.classList.remove("is-blur-up");
     status.textContent = "Final image failed to load";
     galleryStatus.textContent = "Some final images could not be loaded";
@@ -105,7 +179,16 @@ function replayGallery() {
   loadedImages = new Set();
   gallery.setAttribute("aria-busy", "true");
 
-  for (const { record, image, status } of entries) {
+  for (const entry of entries) {
+    const { record, image, status } = entry;
+    entry.replayId = currentReplayId;
+    entry.completionId += 1;
+    entry.activeTransition = null;
+    entry.finalLoadHandled = false;
+    entry.failed = false;
+    entry.transitionStartPromise = new Promise((resolve) => {
+      entry.resolveTransitionStart = resolve;
+    });
     image.removeAttribute("src");
     const previewSrc = format.getPreview(record);
     if (previewSrc) {
@@ -121,19 +204,28 @@ function replayGallery() {
 
   galleryStatus.textContent = `${entries.length} ${format.label} previews shown`;
 
-  replayTimer = setTimeout(() => {
-    if (currentReplayId !== replayId) {
-      return;
-    }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (currentReplayId !== replayId) {
+        return;
+      }
 
-    const cacheKey = `gallery-replay=${Date.now()}`;
-    for (const { record, image, status } of entries) {
-      status.textContent = "Loading full photo...";
-      const finalUrl = new URL(record.src, document.baseURI);
-      finalUrl.search = cacheKey;
-      image.src = finalUrl.href;
-    }
-  }, PREVIEW_DURATION_MS);
+      replayTimer = setTimeout(() => {
+        if (currentReplayId !== replayId) {
+          return;
+        }
+
+        const cacheKey = `gallery-replay=${Date.now()}`;
+        galleryStatus.textContent = `0 of ${entries.length} photos loaded`;
+        for (const { record, image, status } of entries) {
+          status.textContent = "Loading full photo...";
+          const finalUrl = new URL(record.src, document.baseURI);
+          finalUrl.search = cacheKey;
+          image.src = finalUrl.href;
+        }
+      }, PREVIEW_DURATION_MS);
+    });
+  });
 }
 
 async function initializeGallery() {
@@ -162,8 +254,7 @@ async function initializeGallery() {
   replayGallery();
 }
 
-implementationBadge.textContent = window.imagePreviewDemo.implementation;
-implementationBadge.dataset.implementation = window.imagePreviewDemo.implementation.toLowerCase();
+updateImplementationBadge();
 
 formatSelect.addEventListener("change", () => {
   const url = new URL(window.location.href);

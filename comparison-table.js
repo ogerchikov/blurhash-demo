@@ -1,41 +1,18 @@
-import { decode as decodeBlurHash } from "https://cdn.jsdelivr.net/npm/blurhash/+esm";
-import { thumbHashToRGBA } from "https://cdn.jsdelivr.net/npm/thumbhash/+esm";
+import {
+  base64ToBytes,
+  makeBlurhashCanvas,
+  makeThumbhashCanvas,
+} from "./image-hash-utils.js";
 import { loadPhotosManifest } from "./manifest.js";
 
 const tableBody = document.getElementById("previewTableBody");
 
 function normalizeSrc(src) {
-  return (src || "").replace(/^\.\//, "");
-}
-
-function base64ToBytes(base64) {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  return bytes;
-}
-
-function makeCanvasFromRGBA(rgba, width, height) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  const imageData = context.createImageData(width, height);
-  imageData.data.set(rgba);
-  context.putImageData(imageData, 0, 0);
-
-  return canvas;
+  return src.replace(/^\.\//, "");
 }
 
 function decodeSizeForRecord(record) {
-  const sourceWidth = Number(record?.width) || 3;
-  const sourceHeight = Number(record?.height) || 2;
-  const ratio = sourceWidth / sourceHeight;
+  const ratio = record.width / record.height;
   const height = 36;
   const width = Math.max(1, Math.round(height * ratio));
   return { width, height };
@@ -52,59 +29,34 @@ function createOriginalNode(record) {
   const image = new Image();
   image.loading = "lazy";
   image.src = record.src;
-  image.alt = `${record.id || "image"} original`;
+  image.alt = `${record.id} original`;
   viewport.appendChild(image);
   return viewport;
 }
 
 function createBlurHashNode(record) {
   const viewport = createViewportNode();
-
-  if (!record.blurhash) {
-    viewport.classList.add("table-viewport--empty");
-    viewport.textContent = "No blurhash";
-    return viewport;
-  }
-
   const size = decodeSizeForRecord(record);
-  const rgba = decodeBlurHash(record.blurhash, size.width, size.height);
-  const canvas = makeCanvasFromRGBA(rgba, size.width, size.height);
+  const canvas = makeBlurhashCanvas(record.blurhash, size.width, size.height);
   viewport.appendChild(canvas);
-
   return viewport;
 }
 
 function createThumbHashNode(record) {
   const viewport = createViewportNode();
-
-  if (!record.thumbhashBase64) {
-    viewport.classList.add("table-viewport--empty");
-    viewport.textContent = "No thumbhash";
-    return viewport;
-  }
-
   const bytes = base64ToBytes(record.thumbhashBase64);
-  const decoded = thumbHashToRGBA(bytes);
-  const canvas = makeCanvasFromRGBA(decoded.rgba, decoded.w, decoded.h);
+  const canvas = makeThumbhashCanvas(bytes);
   viewport.appendChild(canvas);
-
   return viewport;
 }
 
 function createLqipNode(record) {
   const viewport = createViewportNode();
-
-  if (!record?.lqip?.dataUrl) {
-    viewport.classList.add("table-viewport--empty");
-    viewport.textContent = "No lqip";
-    return viewport;
-  }
-
   const image = new Image();
   image.loading = "lazy";
   image.className = "lqip-preview";
   image.src = record.lqip.dataUrl;
-  image.alt = `${record.id || "image"} lqip`;
+  image.alt = `${record.id} lqip`;
   viewport.appendChild(image);
 
   return viewport;
@@ -112,31 +64,17 @@ function createLqipNode(record) {
 
 function createAvifNode(record) {
   const viewport = createViewportNode();
-
-  if (!record?.avif?.dataUrl) {
-    viewport.classList.add("table-viewport--empty");
-    viewport.textContent = "No avif";
-    return viewport;
-  }
-
   const image = new Image();
   image.loading = "lazy";
   image.className = "lqip-preview";
   image.src = record.avif.dataUrl;
-  image.alt = `${record.id || "image"} avif`;
+  image.alt = `${record.id} avif`;
   viewport.appendChild(image);
 
   return viewport;
 }
 
 function createColorNode(record) {
-  if (!record?.color?.hex) {
-    const viewport = createViewportNode();
-    viewport.classList.add("table-viewport--empty");
-    viewport.textContent = "No color";
-    return viewport;
-  }
-
   const viewport = createViewportNode();
   const swatch = document.createElement("div");
   swatch.className = "color-preview";
@@ -146,66 +84,26 @@ function createColorNode(record) {
 }
 
 function createShimmerNode(record) {
-  if (!record?.shimmer?.dataUrl) {
-    const viewport = createViewportNode();
-    viewport.classList.add("table-viewport--empty");
-    viewport.textContent = "No shimmer";
-    return viewport;
-  }
-
   const viewport = createViewportNode();
   const image = new Image();
   image.loading = "lazy";
   image.className = "shimmer-preview";
   image.src = record.shimmer.dataUrl;
-  image.alt = `${record.id || "image"} shimmer`;
+  image.alt = `${record.id} shimmer`;
   viewport.appendChild(image);
   return viewport;
 }
 
 function createPayloadText(record) {
-  const bytes = record.bytes || {};
-  const lines = [];
-
-  if (record.blurhash) {
-    lines.push(`BlurHash: ${record.blurhash.length} chars`);
-  }
-
-  if (typeof bytes.thumbhashBytes === "number") {
-    lines.push(`ThumbHash: ${bytes.thumbhashBytes} bytes`);
-  } else if (record.thumbhashBase64) {
-    lines.push(`ThumbHash b64: ${record.thumbhashBase64.length} chars`);
-  }
-
-  if (typeof bytes.lqipBytes === "number") {
-    lines.push(`LQIP: ${bytes.lqipBytes} bytes`);
-  } else if (record?.lqip?.dataUrl) {
-    lines.push(`LQIP url: ${record.lqip.dataUrl.length} chars`);
-  }
-
-  if (typeof bytes.avifBytes === "number") {
-    lines.push(`AVIF: ${bytes.avifBytes} bytes`);
-  } else if (record?.avif?.dataUrl) {
-    lines.push(`AVIF url: ${record.avif.dataUrl.length} chars`);
-  }
-
-  if (typeof bytes.colorHexChars === "number" && record?.color?.hex) {
-    lines.push(`Color: ${bytes.colorHexChars} chars (${record.color.hex})`);
-  } else if (record?.color?.hex) {
-    lines.push(`Color: ${record.color.hex}`);
-  }
-
-  if (typeof bytes.shimmerBytes === "number") {
-    lines.push(`Shimmer: ${bytes.shimmerBytes} bytes`);
-  } else if (record?.shimmer?.dataUrl) {
-    lines.push(`Shimmer url: ${record.shimmer.dataUrl.length} chars`);
-  }
-
-  if (lines.length === 0) {
-    lines.push("No payload data");
-  }
-
-  return lines.join("\n");
+  const { bytes } = record;
+  return [
+    `BlurHash: ${record.blurhash.length} chars`,
+    `ThumbHash: ${bytes.thumbhashBytes} bytes`,
+    `LQIP: ${bytes.lqipBytes} bytes`,
+    `AVIF: ${bytes.avifBytes} bytes`,
+    `Color: ${bytes.colorHexChars} chars (${record.color.hex})`,
+    `Shimmer: ${bytes.shimmerBytes} bytes`,
+  ].join("\n");
 }
 
 function buildRow(record) {
@@ -215,9 +113,9 @@ function buildRow(record) {
   imageMetaCell.className = "meta-cell";
   const normalized = normalizeSrc(record.src);
   imageMetaCell.innerHTML = `
-    <strong>${record.id || "(no id)"}</strong>
-    <span>${normalized || "(no src)"}</span>
-    <span>${record.width || "?"} x ${record.height || "?"}</span>
+    <strong>${record.id}</strong>
+    <span>${normalized}</span>
+    <span>${record.width} x ${record.height}</span>
   `;
 
   const originalCell = document.createElement("td");
