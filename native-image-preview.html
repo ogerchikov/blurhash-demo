@@ -4,18 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Photo Preview Gallery</title>
-  <link rel="stylesheet" href="./styles.css" />
-  <script>
-    const hasNativePreviewSource =
-      "previewSrc" in HTMLImageElement.prototype;
-    window.imagePreviewDemo = { hasNativePreviewSource };
-
-    if (!hasNativePreviewSource) {
-      document.write(
-        '<script src="./image-preview-polyfill.js"><\/script>',
-      );
-    }
-  </script>
+  <link rel="stylesheet" href="./base.css" />
+  <link rel="stylesheet" href="./gallery.css" />
 </head>
 <body>
   <main class="app-shell gallery-shell">
@@ -27,12 +17,14 @@
       </div>
       <p class="utility-links">
         <a class="utility-link" href="./index.html">Back to Main Comparison</a>
+        <a class="utility-link" href="./single-image-preview.html">Open Single-image Gallery</a>
         <a class="utility-link" href="./comparison-table.html">Open Comparison Table</a>
       </p>
     </header>
 
-    <section class="gallery-toolbar" aria-label="Gallery preview controls">
-      <label class="gallery-format-control" for="previewFormatSelect">
+    <section class="gallery-toolbar" aria-labelledby="demoControlsTitle">
+      <h2 id="demoControlsTitle" class="gallery-toolbar-title">Demo controls</h2>
+      <label class="gallery-format-control">
         Preview format
         <select id="previewFormatSelect">
           <option value="blurhash">BlurHash</option>
@@ -43,14 +35,23 @@
       </label>
       <div class="gallery-implementation">
         <span>Preview engine</span>
-        <strong id="implementationBadge" class="implementation-badge">Detecting...</strong>
+        <output id="implementationBadge" class="implementation-badge">Detecting...</output>
       </div>
-      <button id="reloadGalleryButton" type="button">Reload previews</button>
+      <label id="polyfillTransitionControl" class="gallery-transition-control" hidden>
+        <span>Polyfill transition</span>
+        <span class="gallery-checkbox">
+          <input id="polyfillTransitionInput" type="checkbox" />
+          Enabled
+        </span>
+      </label>
+      <button id="reloadGalleryButton" class="gallery-action-button" type="button">
+        Reload previews
+      </button>
     </section>
 
     <section class="gallery-summary" aria-live="polite">
-      <p id="galleryStatus">Loading photo manifest...</p>
-      <strong id="photoCount">0 photos</strong>
+      <output id="galleryStatus">Loading photo manifest...</output>
+      <output id="photoCount">0 photos</output>
     </section>
 
     <section id="photoGallery" class="photo-gallery" aria-label="Photo preview gallery" aria-busy="true"></section>

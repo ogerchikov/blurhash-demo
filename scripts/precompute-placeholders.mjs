@@ -23,6 +23,7 @@ const SUPPORTED_EXTENSIONS = new Set([
 const LQIP_MAX_DIMENSION = 32;
 const LQIP_JPEG_QUALITY = 45;
 const INLINE_AVIF_QUALITY = 45;
+const THUMBHASH_MAX_DIMENSION = 100;
 
 function isSupportedImage(fileName) {
   return SUPPORTED_EXTENSIONS.has(path.extname(fileName).toLowerCase());
@@ -111,11 +112,25 @@ async function computePlaceholdersForImage(fileName) {
   const { xComponents, yComponents } = computeBlurhashComponents(info.width, info.height);
 
   const blurhash = encodeBlurhash(rgba, info.width, info.height, xComponents, yComponents);
-  const thumbhashBytes = rgbaToThumbHash(info.width, info.height, data);
+  const thumbhash = await sharp(filePath)
+    .ensureAlpha()
+    .resize({
+      width: THUMBHASH_MAX_DIMENSION,
+      height: THUMBHASH_MAX_DIMENSION,
+      fit: "inside",
+    })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const thumbhashBytes = rgbaToThumbHash(
+    thumbhash.info.width,
+    thumbhash.info.height,
+    thumbhash.data,
+  );
   const thumbhashBase64 = Buffer.from(thumbhashBytes).toString("base64");
 
   const lqip = await sharp(filePath)
     .resize({ width: LQIP_MAX_DIMENSION, height: LQIP_MAX_DIMENSION, fit: "inside" })
+    .blur(1)
     .jpeg({ quality: LQIP_JPEG_QUALITY })
     .toBuffer({ resolveWithObject: true });
   const lqipBase64 = lqip.data.toString("base64");
@@ -207,6 +222,7 @@ async function main() {
 
   const payload = {
     generatedAt: new Date().toISOString(),
+    generatedBy: "node-precompute",
     images: photos,
   };
 

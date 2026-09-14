@@ -263,6 +263,8 @@ function makeLqipDataUrl(image, maxDimension = LQIP_MAX_DIMENSION, quality = LQI
 
   const context = canvas.getContext("2d");
   context.drawImage(image, 0, 0, targetWidth, targetHeight);
+  context.filter = "blur(1px)";
+  context.drawImage(image, 0, 0, targetWidth, targetHeight);
 
   return {
     width: targetWidth,

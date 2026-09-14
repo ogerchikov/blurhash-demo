@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Single Image Preview Gallery</title>
+  <link rel="stylesheet" href="./base.css" />
+  <link rel="stylesheet" href="./gallery.css" />
+</head>
+<body>
+  <main class="app-shell gallery-shell single-gallery-shell">
+    <header class="gallery-hero">
+      <div>
+        <p class="gallery-eyebrow">Native image previews</p>
+        <h1>Single-image gallery</h1>
+        <p>Browse one photo at a time and watch its preview hand off to the final image.</p>
+      </div>
+      <p class="utility-links">
+        <a class="utility-link" href="./index.html">Back to Main Comparison</a>
+        <a class="utility-link" href="./native-image-preview.html">Open Grid Gallery</a>
+      </p>
+    </header>
+
+    <section class="gallery-toolbar" aria-labelledby="demoControlsTitle">
+      <h2 id="demoControlsTitle" class="gallery-toolbar-title">Demo controls</h2>
+      <label class="gallery-format-control">
+        Preview format
+        <select id="previewFormatSelect">
+          <option value="blurhash">BlurHash</option>
+          <option value="thumbhash">ThumbHash</option>
+          <option value="lqip">LQIP / blur-up</option>
+          <option value="avif">Inline AVIF</option>
+        </select>
+      </label>
+      <div class="gallery-implementation">
+        <span>Preview engine</span>
+        <output id="implementationBadge" class="implementation-badge">Detecting...</output>
+      </div>
+      <label id="polyfillTransitionControl" class="gallery-transition-control" hidden>
+        <span>Polyfill transition</span>
+        <span class="gallery-checkbox">
+          <input id="polyfillTransitionInput" type="checkbox" />
+          Enabled
+        </span>
+      </label>
+      <button id="reloadGalleryButton" class="gallery-action-button" type="button">
+        Reload preview
+      </button>
+    </section>
+
+    <section id="singlePhotoViewer" class="single-photo-viewer" aria-labelledby="singlePhotoTitle" aria-busy="true">
+      <figure class="single-photo-figure">
+        <div class="single-photo-frame">
+          <img id="singlePhoto" alt="" decoding="async" />
+        </div>
+        <figcaption class="single-photo-caption" aria-live="polite">
+          <output id="singlePhotoTitle">Loading photo manifest...</output>
+        </figcaption>
+      </figure>
+      <nav class="single-photo-navigation" aria-label="Browse photos">
+        <button id="previousPhotoButton" class="gallery-action-button" type="button">
+          Previous
+        </button>
+        <output id="photoPosition">0 of 0</output>
+        <button id="nextPhotoButton" class="gallery-action-button" type="button">
+          Next
+        </button>
+      </nav>
+    </section>
+  </main>
+
+  <script type="module" src="./single-image-preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+:root {
+  --bg: #f3f7fb;
+  --ink: #132134;
+  --muted: #52637a;
+  --card: #ffffff;
+  --line: #d7e0ea;
+  --blurhash-accent: #1f6feb;
+  --thumbhash-accent: #0f9d8a;
+  --lqip-accent: #d97706;
+  --avif-accent: #0ea5e9;
+  --color-accent: #8b5cf6;
+  --shimmer-accent: #ec4899;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 10% 0%, #e8f1ff 0%, var(--bg) 45%);
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Lucida Sans", "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  padding: 28px 18px 36px;
+}
+
+.utility-link {
+  color: var(--blurhash-accent);
+  font-weight: 600;
+}
+
+.utility-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}

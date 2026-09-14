@@ -16,11 +16,16 @@ and a separate demo of the proposed native image-preview API.
 
 - `index.html`: Main comparison page with interactive cards and per-image rows table.
 - `app.js`: Runtime logic for placeholder generation, manifest loading, row selection, and benchmarks.
-- `styles.css`: Shared styles for cards, tables, placeholders, and transitions.
+- `base.css`: Shared page, typography, and utility-link styles.
+- `styles.css`: Main comparison and comparison-table styles.
+- `gallery.css`: Grid and single-image gallery styles.
 - `comparison-table.html`: Dedicated table page for comparing original and placeholders.
 - `comparison-table.js`: Data loading and placeholder rendering for the comparison table page.
 - `native-image-preview.html`: Native `previewsrc` / `HTMLImageElement.previewSrc` API demo.
 - `native-image-preview.js`: Demo setup, implementation status, and final-image reload behavior.
+- `single-image-preview.html`: Single-image gallery with previous and next controls.
+- `single-image-preview.js`: Single-image navigation and preview playback.
+- `image-preview-demo-support.js`: Shared native detection and conditional polyfill loading.
 - `image-preview-polyfill.js`: Fallback implementation loaded only when the native API is unavailable.
 - `precompute.html`: Browser-only precompute tool page.
 - `precompute-browser.js`: Computes placeholder data in-browser and exports `photos.json`.
@@ -101,14 +106,19 @@ Each card preserves the photo dimensions from the manifest and uses a real `<img
 - Inline AVIF using the manifest's AVIF preview data URL
 
 Changing the format automatically replays the gallery, and **Reload previews** repeats the selected
-preview with cache-busted final image requests. Previews remain visible for a short fixed delay
-before final `src` values are assigned. The page prefers a native
-`HTMLImageElement.previewSrc` implementation and loads `image-preview-polyfill.js` only when the
-native API is absent.
+preview using normal browser caching. The demo assigns `previewsrc` and `src` together, as a
+production page would, so the preview remains visible only while the final image loads. The page
+prefers a native `HTMLImageElement.previewSrc` implementation and loads
+`image-preview-polyfill.js` only when the native API is absent.
 
 The preview-engine badge reports **Native API** when `previewSrc` exists at page startup and
-**Polyfill** otherwise. `window.imagePreviewDemo.hasNativePreviewSource` records native support
-before the fallback can install its own `previewSrc` property.
+**Polyfill** otherwise. Support is checked before the fallback can install its own `previewSrc`
+property. When the polyfill is active, the **Polyfill transition** checkbox toggles its opt-in
+`ImagePreviewPolyfill.transitionsEnabled` flag and replays the gallery.
+
+Open `single-image-preview.html` for the same preview-format and transition controls with one
+photo displayed at a time. Use **Previous** and **Next** to browse the manifest; the controls are
+disabled at the beginning and end of the list.
 
 ## Precompute `photos.json`
 

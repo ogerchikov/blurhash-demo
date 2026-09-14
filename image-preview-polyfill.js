@@ -12,6 +12,7 @@
   const transitionScopeAttribute = "data-image-preview-transition-scope";
   let hashUtilsModule;
   let nextTransitionScopeId = 0;
+  let transitionsEnabled = false;
 
   function installViewTransitionStyles() {
     if (
@@ -66,12 +67,6 @@
           to { mix-blend-mode: plus-lighter; }
         }
 
-        /* This demo intentionally preserves the preview fade under reduced motion. */
-        @media (prefers-reduced-motion: reduce) {
-          [data-image-preview-transition-scope]::view-transition-group(*) {
-            animation-duration: 2s;
-          }
-        }
       }
     `;
     (document.head || document.documentElement).appendChild(style);
@@ -217,6 +212,11 @@
     }
 
     const finalUrl = image.currentSrc || image.src;
+    if (!transitionsEnabled) {
+      restoreContent(image, state);
+      return;
+    }
+
     const scope = getTransitionScope(image);
     if (!scope) {
       restoreContent(image, state);
@@ -256,10 +256,6 @@
     }
 
     state.transition = transition;
-    image.dispatchEvent(new CustomEvent("imagepreviewtransitionstart", {
-      detail: { transition },
-    }));
-    transition.ready.catch(() => {});
     transition.finished
       .catch(() => {})
       .finally(() => {
@@ -276,12 +272,6 @@
   }
 
   function showPreview(image, state, previewUrl) {
-    if (state.contentOverridden) {
-      image.style.setProperty("content", cssUrl(previewUrl), "important");
-      state.previewVisible = true;
-      return;
-    }
-
     state.previousContent = image.style.getPropertyValue("content");
     state.previousContentPriority = image.style.getPropertyPriority("content");
     image.style.setProperty("content", cssUrl(previewUrl), "important");
@@ -297,7 +287,7 @@
 
     state = {
       version: 0,
-      finalReady: image.complete && image.naturalWidth > 0,
+      finalReady: false,
       contentOverridden: false,
       previewVisible: false,
       previousContent: "",
@@ -364,12 +354,6 @@
       }
     }, { once: true });
 
-    preview.addEventListener("error", () => {
-      if (state.version === version) {
-        restoreContent(image, state);
-      }
-    }, { once: true });
-
     preview.src = displayablePreviewUrl;
   }
 
@@ -401,24 +385,12 @@
     },
   });
 
-  if (!("activeImagePreviewTransition" in HTMLImageElement.prototype)) {
-    Object.defineProperty(
-      HTMLImageElement.prototype,
-      "activeImagePreviewTransition",
-      {
-        configurable: true,
-        enumerable: true,
-        get() {
-          return states.get(this)?.transition || null;
-        },
-      },
-    );
-  }
-
   const observer = new MutationObserver((records) => {
     for (const record of records) {
       if (record.type === "attributes") {
-        updateImage(record.target);
+        if (record.target instanceof HTMLImageElement) {
+          updateImage(record.target);
+        }
         continue;
       }
 
@@ -434,7 +406,15 @@
   });
 
   upgrade(document);
-  installViewTransitionStyles();
-
-  window.ImagePreviewPolyfill = Object.freeze({ upgrade });
+  window.ImagePreviewPolyfill = Object.freeze({
+    get transitionsEnabled() {
+      return transitionsEnabled;
+    },
+    set transitionsEnabled(value) {
+      transitionsEnabled = Boolean(value);
+      if (transitionsEnabled) {
+        installViewTransitionStyles();
+      }
+    },
+  });
 }());
