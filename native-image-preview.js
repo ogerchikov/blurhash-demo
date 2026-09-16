@@ -2,6 +2,7 @@ import {
   galleryPreviewFormats as formats,
 } from "./gallery-preview-formats.js";
 import {
+  createFreshImageObjectUrl,
   initializeImagePreviewControls,
   loadImagePreviewImplementation,
 } from "./image-preview-demo-support.js";
@@ -23,6 +24,7 @@ const gallery = document.getElementById("photoGallery");
 let entries = [];
 let settledImages = new Set();
 let failedImages = 0;
+let replayVersion = 0;
 
 function photoName(src) {
   const filename = src.split("/").pop().replace(/\.[^.]+$/, "");
@@ -61,6 +63,7 @@ function createGalleryEntry(record) {
     record,
     image,
     status,
+    objectUrl: null,
   };
 
   function settle(failed) {
@@ -89,7 +92,9 @@ function createGalleryEntry(record) {
   return { card, entry };
 }
 
-function replayGallery() {
+async function replayGallery(forceReload = false) {
+  const version = replayVersion + 1;
+  replayVersion = version;
   const format = formats[formatSelect.value];
   settledImages = new Set();
   failedImages = 0;
@@ -98,10 +103,60 @@ function replayGallery() {
 
   for (const entry of entries) {
     const { record, image, status } = entry;
+    if (entry.objectUrl) {
+      URL.revokeObjectURL(entry.objectUrl);
+      entry.objectUrl = null;
+    }
     image.removeAttribute("src");
     image.setAttribute("previewsrc", format.getPreview(record));
     status.textContent = "Loading full photo...";
-    image.src = record.src;
+  }
+
+  const sources = forceReload
+    ? await Promise.all(entries.map(async ({ record }) => {
+        try {
+          return {
+            src: await createFreshImageObjectUrl(record.src),
+            objectUrl: true,
+          };
+        } catch (error) {
+          return { error };
+        }
+      }))
+    : entries.map(({ record }) => ({ src: record.src, objectUrl: false }));
+
+  if (version !== replayVersion) {
+    for (const source of sources) {
+      if (source.objectUrl) {
+        URL.revokeObjectURL(source.src);
+      }
+    }
+    return;
+  }
+
+  sources.forEach((source, index) => {
+    const entry = entries[index];
+    if (source.error) {
+      console.error(source.error);
+      entry.status.textContent = "Final image failed to load";
+      settle(true);
+      return;
+    }
+    entry.objectUrl = source.objectUrl ? source.src : null;
+    entry.image.src = source.src;
+  });
+}
+
+function replayFreshGallery() {
+  replayGallery(true);
+}
+
+function revokeObjectUrls() {
+  for (const entry of entries) {
+    if (entry.objectUrl) {
+      URL.revokeObjectURL(entry.objectUrl);
+      entry.objectUrl = null;
+    }
   }
 }
 
@@ -124,12 +179,13 @@ async function initializeGallery() {
     transitionInput: polyfillTransitionInput,
     hasNativePreviewSource,
     polyfill,
-    replay: replayGallery,
+    replay: replayFreshGallery,
   });
   replayGallery();
 }
 
-reloadButton.addEventListener("click", replayGallery);
+reloadButton.addEventListener("click", replayFreshGallery);
+window.addEventListener("pagehide", revokeObjectUrls);
 
 try {
   await initializeGallery();

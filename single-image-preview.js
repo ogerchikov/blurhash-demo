@@ -2,6 +2,7 @@ import {
   galleryPreviewFormats as formats,
 } from "./gallery-preview-formats.js";
 import {
+  createFreshImageObjectUrl,
   initializeImagePreviewControls,
   loadImagePreviewImplementation,
 } from "./image-preview-demo-support.js";
@@ -25,6 +26,8 @@ const nextButton = document.getElementById("nextPhotoButton");
 
 let records = [];
 let currentIndex = 0;
+let displayVersion = 0;
+let objectUrl = null;
 
 function photoName(src) {
   const filename = src.split("/").pop().replace(/\.[^.]+$/, "");
@@ -40,11 +43,17 @@ function updateNavigation() {
   nextButton.disabled = currentIndex === records.length - 1;
 }
 
-function displayCurrentPhoto() {
+async function displayCurrentPhoto(forceReload = false) {
+  const version = displayVersion + 1;
+  displayVersion = version;
   const record = records[currentIndex];
   const format = formats[formatSelect.value];
   const previewSrc = format.getPreview(record);
 
+  if (objectUrl) {
+    URL.revokeObjectURL(objectUrl);
+    objectUrl = null;
+  }
   viewer.setAttribute("aria-busy", "true");
   image.removeAttribute("src");
   image.setAttribute("previewsrc", previewSrc);
@@ -54,7 +63,29 @@ function displayCurrentPhoto() {
   title.textContent = image.alt;
   updateNavigation();
 
-  image.src = record.src;
+  let source = record.src;
+  if (forceReload) {
+    try {
+      source = await createFreshImageObjectUrl(record.src);
+    } catch (error) {
+      if (version === displayVersion) {
+        console.error(error);
+        viewer.setAttribute("aria-busy", "false");
+        title.textContent = `${image.alt} failed to load`;
+      }
+      return;
+    }
+  }
+
+  if (version !== displayVersion) {
+    if (source !== record.src) {
+      URL.revokeObjectURL(source);
+    }
+    return;
+  }
+
+  objectUrl = source !== record.src ? source : null;
+  image.src = source;
 }
 
 image.addEventListener("load", () => {
@@ -66,14 +97,19 @@ image.addEventListener("error", () => {
   title.textContent = `${image.alt} failed to load`;
 });
 
-reloadButton.addEventListener("click", displayCurrentPhoto);
+reloadButton.addEventListener("click", () => displayCurrentPhoto(true));
 previousButton.addEventListener("click", () => {
   currentIndex -= 1;
-  displayCurrentPhoto();
+  displayCurrentPhoto(true);
 });
 nextButton.addEventListener("click", () => {
   currentIndex += 1;
-  displayCurrentPhoto();
+  displayCurrentPhoto(true);
+});
+window.addEventListener("pagehide", () => {
+  if (objectUrl) {
+    URL.revokeObjectURL(objectUrl);
+  }
 });
 
 try {
@@ -87,7 +123,7 @@ try {
     transitionInput: polyfillTransitionInput,
     hasNativePreviewSource,
     polyfill,
-    replay: displayCurrentPhoto,
+    replay: () => displayCurrentPhoto(true),
   });
   displayCurrentPhoto();
 } catch (error) {

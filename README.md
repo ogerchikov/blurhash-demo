@@ -106,8 +106,9 @@ Each card preserves the photo dimensions from the manifest and uses a real `<img
 - Inline AVIF using the manifest's AVIF preview data URL
 
 Changing the format automatically replays the gallery, and **Reload previews** repeats the selected
-preview using normal browser caching. The demo assigns `previewsrc` and `src` together, as a
-production page would, so the preview remains visible only while the final image loads. The page
+preview by fetching the original image URL with reload cache semantics and displaying the response
+through a temporary object URL. This keeps replay requests fresh without modifying the image URL.
+The initial load assigns `previewsrc` and `src` together, as a production page would. The page
 prefers a native `HTMLImageElement.previewSrc` implementation and loads
 `image-preview-polyfill.js` only when the native API is absent.
 

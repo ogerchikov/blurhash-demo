@@ -14,6 +14,14 @@ export async function loadImagePreviewImplementation() {
   };
 }
 
+export async function createFreshImageObjectUrl(src) {
+  const response = await fetch(src, { cache: "reload" });
+  if (!response.ok) {
+    throw new Error(`Image request failed with HTTP ${response.status}.`);
+  }
+  return URL.createObjectURL(await response.blob());
+}
+
 export function initializeImagePreviewControls({
   formatSelect,
   implementationBadge,
