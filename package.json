@@ -4,11 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "precompute": "node ./scripts/precompute-placeholders.mjs"
+    "precompute": "node ./scripts/precompute-placeholders.mjs",
+    "tools:setup-image-encoders": "node ./scripts/setup-image-encoders.mjs",
+    "demo:generate-progressive": "node ./scripts/generate-progressive-demo-assets.mjs",
+    "benchmark:generate": "node ./scripts/generate-benchmark-assets.mjs",
+    "benchmark:serve": "node ./scripts/benchmark-server.mjs",
+    "benchmark:run": "node ./scripts/run-benchmark.mjs"
   },
   "dependencies": {
     "blurhash": "^2.0.5",
     "sharp": "^0.34.3",
     "thumbhash": "^0.1.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
   }
 }

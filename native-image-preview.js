@@ -2,9 +2,12 @@ import {
   galleryPreviewFormats as formats,
 } from "./gallery-preview-formats.js";
 import {
+  cancelImagePreviewLoading,
   createFreshImageObjectUrl,
+  finishImagePreviewLoading,
   initializeImagePreviewControls,
   loadImagePreviewImplementation,
+  startImagePreviewLoading,
 } from "./image-preview-demo-support.js";
 import { loadPhotosManifest } from "./manifest.js";
 
@@ -17,6 +20,8 @@ const polyfillTransitionControl = document.getElementById(
 const polyfillTransitionInput = document.getElementById(
   "polyfillTransitionInput",
 );
+const polyfillBlurControl = document.getElementById("polyfillBlurControl");
+const polyfillBlurInput = document.getElementById("polyfillBlurInput");
 const galleryStatus = document.getElementById("galleryStatus");
 const photoCount = document.getElementById("photoCount");
 const gallery = document.getElementById("photoGallery");
@@ -25,6 +30,27 @@ let entries = [];
 let settledImages = new Set();
 let failedImages = 0;
 let replayVersion = 0;
+let previewImplementation = null;
+
+function freshUrl(src, version) {
+  const url = new URL(src, window.location.href);
+  url.searchParams.set("replay", `${performance.timeOrigin}-${version}`);
+  return url.href;
+}
+
+function updateModeControls(format) {
+  const usesPreview = format.strategy === "preview";
+  implementationBadge.textContent = usesPreview
+    ? previewImplementation.hasNativePreviewSource
+      ? "Native API"
+      : "Polyfill"
+    : "Browser codec";
+  implementationBadge.title = usesPreview
+    ? "This mode uses previewsrc before the final image."
+    : "This mode loads one progressive image directly.";
+  polyfillTransitionControl.hidden = !usesPreview || !previewImplementation.polyfill;
+  polyfillBlurControl.hidden = !usesPreview || !previewImplementation.polyfill;
+}
 
 function photoName(src) {
   const filename = src.split("/").pop().replace(/\.[^.]+$/, "");
@@ -81,11 +107,16 @@ function createGalleryEntry(record) {
   }
 
   image.addEventListener("load", () => {
+    finishImagePreviewLoading(image);
     status.textContent = "Loaded";
     settle(false);
   });
   image.addEventListener("error", () => {
-    status.textContent = "Final image failed to load";
+    cancelImagePreviewLoading(image);
+    const format = formats[formatSelect.value];
+    status.textContent = format.strategy === "progressive"
+      ? `${format.label} is unsupported or failed to load`
+      : "Final image failed to load";
     settle(true);
   });
 
@@ -96,6 +127,8 @@ async function replayGallery(forceReload = false) {
   const version = replayVersion + 1;
   replayVersion = version;
   const format = formats[formatSelect.value];
+  const usesPreview = format.strategy === "preview";
+  updateModeControls(format);
   settledImages = new Set();
   failedImages = 0;
   gallery.setAttribute("aria-busy", "true");
@@ -108,11 +141,25 @@ async function replayGallery(forceReload = false) {
       entry.objectUrl = null;
     }
     image.removeAttribute("src");
-    image.setAttribute("previewsrc", format.getPreview(record));
-    status.textContent = "Loading full photo...";
+    if (usesPreview) {
+      startImagePreviewLoading(image);
+      image.setAttribute("previewsrc", format.getPreview(record));
+      status.textContent = "Loading full photo...";
+    } else {
+      cancelImagePreviewLoading(image);
+      image.removeAttribute("previewsrc");
+      status.textContent = `Loading ${format.label}...`;
+    }
   }
 
-  const sources = forceReload
+  const sources = !usesPreview
+    ? entries.map(({ record }) => ({
+        src: forceReload
+          ? freshUrl(format.getSource(record), version)
+          : format.getSource(record),
+        objectUrl: false,
+      }))
+    : forceReload
     ? await Promise.all(entries.map(async ({ record }) => {
         try {
           return {
@@ -138,6 +185,7 @@ async function replayGallery(forceReload = false) {
     const entry = entries[index];
     if (source.error) {
       console.error(source.error);
+      cancelImagePreviewLoading(entry.image);
       entry.status.textContent = "Final image failed to load";
       settle(true);
       return;
@@ -163,6 +211,7 @@ function revokeObjectUrls() {
 async function initializeGallery() {
   const { hasNativePreviewSource, polyfill } =
     await loadImagePreviewImplementation();
+  previewImplementation = { hasNativePreviewSource, polyfill };
   const { images: records } = await loadPhotosManifest();
   const fragment = document.createDocumentFragment();
   entries = records.map((record) => {
@@ -177,6 +226,8 @@ async function initializeGallery() {
     implementationBadge,
     transitionControl: polyfillTransitionControl,
     transitionInput: polyfillTransitionInput,
+    blurControl: polyfillBlurControl,
+    blurInput: polyfillBlurInput,
     hasNativePreviewSource,
     polyfill,
     replay: replayFreshGallery,

@@ -14,6 +14,29 @@
   let nextTransitionScopeId = 0;
   let transitionsEnabled = false;
 
+  function emitTiming(image, milestone) {
+    const benchmarkId = image.dataset.imagePreviewBenchmarkId;
+    if (!benchmarkId) {
+      return;
+    }
+
+    const time = performance.now();
+    performance.mark(`image-preview:${benchmarkId}:${milestone}`);
+    document.dispatchEvent(new CustomEvent("imagepreviewtiming", {
+      detail: { benchmarkId, milestone, time },
+    }));
+  }
+
+  function emitAfterPaint(image, state, version, milestone) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (state.version === version) {
+          emitTiming(image, milestone);
+        }
+      });
+    });
+  }
+
   function installViewTransitionStyles() {
     if (
       typeof document.createElement("img").startViewTransition !== "function"
@@ -214,12 +237,16 @@
     const finalUrl = image.currentSrc || image.src;
     if (!transitionsEnabled) {
       restoreContent(image, state);
+      emitTiming(image, "final-committed");
+      emitAfterPaint(image, state, version, "final-painted");
       return;
     }
 
     const scope = getTransitionScope(image);
     if (!scope) {
       restoreContent(image, state);
+      emitTiming(image, "final-committed");
+      emitAfterPaint(image, state, version, "final-painted");
       return;
     }
 
@@ -244,6 +271,8 @@
         if (state.version === version) {
           image.style.setProperty("content", cssUrl(finalUrl), "important");
           state.previewVisible = false;
+          emitTiming(image, "final-committed");
+          emitAfterPaint(image, state, version, "final-painted");
         }
       });
     } catch {
@@ -277,6 +306,8 @@
     image.style.setProperty("content", cssUrl(previewUrl), "important");
     state.contentOverridden = true;
     state.previewVisible = true;
+    emitTiming(image, "preview-committed");
+    emitAfterPaint(image, state, state.version, "preview-painted");
   }
 
   function getState(image) {
@@ -304,6 +335,7 @@
       state.finalReady = true;
       const version = state.version + 1;
       state.version = version;
+      emitTiming(image, "final-loaded");
       revealFinalImage(image, state, version);
     });
 
@@ -324,6 +356,7 @@
     if (!previewUrl || state.finalReady) {
       return;
     }
+    emitTiming(image, "preview-requested");
 
     let displayablePreviewUrl;
     try {
@@ -350,7 +383,13 @@
         && !state.finalReady
         && image.isConnected
       ) {
+        emitTiming(image, "preview-loaded");
         showPreview(image, state, preview.currentSrc || displayablePreviewUrl);
+      }
+    }, { once: true });
+    preview.addEventListener("error", () => {
+      if (state.version === version) {
+        emitTiming(image, "preview-error");
       }
     }, { once: true });
 

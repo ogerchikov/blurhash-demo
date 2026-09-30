@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Preview vs Progressive Image Benchmark</title>
+  <link rel="stylesheet" href="./base.css" />
+  <link rel="stylesheet" href="./benchmark.css" />
+</head>
+<body>
+  <main class="app-shell benchmark-shell">
+    <header class="benchmark-hero">
+      <div>
+        <p class="benchmark-eyebrow">Isolated image loading</p>
+        <h1>Preview source vs progressive image</h1>
+        <p>
+          Compare any generated <code>previewsrc</code> and final
+          <code>src</code> pair with a progressive codec.
+        </p>
+      </div>
+      <p class="utility-links">
+        <a class="utility-link" href="./index.html">Main comparison</a>
+        <a class="utility-link" href="./native-image-preview.html">Preview gallery</a>
+      </p>
+    </header>
+
+    <section id="benchmarkControls" class="benchmark-controls" aria-labelledby="controlsTitle">
+      <h2 id="controlsTitle">Configuration</h2>
+      <label>
+        Image
+        <select id="imageSelect"></select>
+      </label>
+      <label>
+        <code>previewsrc</code> format
+        <select id="previewSelect"></select>
+      </label>
+      <label>
+        Final <code>src</code> format
+        <select id="finalSelect"></select>
+      </label>
+      <label>
+        Progressive format
+        <select id="progressiveSelect"></select>
+      </label>
+      <label>
+        Delivery
+        <select id="deliverySelect">
+          <option value="auto" selected>Auto-detect</option>
+          <option value="direct">Direct / static hosting</option>
+          <option value="controlled">Controlled streaming server</option>
+        </select>
+      </label>
+      <label id="rateControl">
+        Rate
+        <select id="rateSelect">
+          <option value="20000">20 Mbps</option>
+          <option value="1500" selected>1.5 Mbps</option>
+          <option value="400">400 Kbps</option>
+        </select>
+      </label>
+      <label id="latencyControl">
+        Initial latency
+        <select id="latencySelect">
+          <option value="0">0 ms</option>
+          <option value="100" selected>100 ms</option>
+          <option value="200">200 ms</option>
+        </select>
+      </label>
+      <button id="runButton" type="button">Run both strategies</button>
+    </section>
+
+    <p id="benchmarkStatus" class="benchmark-status" role="status">
+      Loading benchmark manifest...
+    </p>
+
+    <section class="benchmark-workbench" aria-label="Current benchmark image">
+      <div id="imageFrame" class="benchmark-image-frame">
+        <img id="benchmarkImage" alt="" />
+      </div>
+      <div class="benchmark-run-summary">
+        <div>
+          <span>Preview implementation</span>
+          <strong id="implementationValue">Detecting...</strong>
+        </div>
+        <div>
+          <span>Active strategy</span>
+          <strong id="strategyValue">Idle</strong>
+        </div>
+        <div>
+          <span>Asset compatibility</span>
+          <strong id="compatibilityValue">Not tested</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="benchmark-results" aria-labelledby="resultsTitle">
+      <h2 id="resultsTitle">Latest clean-pass results</h2>
+      <p class="benchmark-note">
+        Progressive first-frame timing requires a separate visual pass. Instrumented preview
+        paint is available for the polyfill and is not treated as native API timing. Codec
+        quality settings are intentionally visible production defaults, not byte- or
+        quality-matched encodes. Inline preview choices include their complete Base64 data URL
+        in configured bytes but do not create a separate observed HTTP response. Direct delivery
+        works on static hosts such as GitHub Pages; bandwidth and latency are then uncontrolled.
+        Select the same final and progressive codec to isolate loading strategy from codec
+        efficiency.
+      </p>
+      <div class="result-grid">
+        <article>
+          <h3><code>previewsrc</code> + <code>src</code></h3>
+          <dl id="previewResults" class="metric-list"></dl>
+        </article>
+        <article>
+          <h3>Progressive image</h3>
+          <dl id="progressiveResults" class="metric-list"></dl>
+        </article>
+      </div>
+      <details>
+        <summary>Structured result</summary>
+        <pre id="structuredResult">No run completed.</pre>
+      </details>
+    </section>
+  </main>
+
+  <script type="module" src="./benchmark.js"></script>
+</body>
+</html>

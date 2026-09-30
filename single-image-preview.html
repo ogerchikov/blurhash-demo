@@ -11,9 +11,9 @@
   <main class="app-shell gallery-shell single-gallery-shell">
     <header class="gallery-hero">
       <div>
-        <p class="gallery-eyebrow">Native image previews</p>
+        <p class="gallery-eyebrow">Image loading strategies</p>
         <h1>Single-image gallery</h1>
-        <p>Browse one photo at a time and watch its preview hand off to the final image.</p>
+        <p>Browse one photo at a time and compare preview handoffs with progressive rendering.</p>
       </div>
       <p class="utility-links">
         <a class="utility-link" href="./index.html">Back to Main Comparison</a>
@@ -24,16 +24,28 @@
     <section class="gallery-toolbar" aria-labelledby="demoControlsTitle">
       <h2 id="demoControlsTitle" class="gallery-toolbar-title">Demo controls</h2>
       <label class="gallery-format-control">
-        Preview format
+        Loading strategy
         <select id="previewFormatSelect">
-          <option value="blurhash">BlurHash</option>
-          <option value="thumbhash">ThumbHash</option>
-          <option value="lqip">LQIP / blur-up</option>
-          <option value="avif">Inline AVIF</option>
+          <optgroup label="Preview source + original">
+            <option value="blurhash">BlurHash</option>
+            <option value="thumbhash">ThumbHash</option>
+            <option value="lqip">LQIP / blur-up</option>
+            <option value="avif">Inline AVIF</option>
+          </optgroup>
+          <optgroup label="Progressive image">
+            <option value="progressive-jpeg">Progressive JPEG</option>
+            <option value="interlaced-png">Adam7 interlaced PNG</option>
+            <option value="progressive-avif">
+              Progressive AVIF
+            </option>
+            <option value="progressive-jxl">
+              Progressive JPEG XL (browser support required)
+            </option>
+          </optgroup>
         </select>
       </label>
       <div class="gallery-implementation">
-        <span>Preview engine</span>
+        <span>Rendering path</span>
         <output id="implementationBadge" class="implementation-badge">Detecting...</output>
       </div>
       <label id="polyfillTransitionControl" class="gallery-transition-control" hidden>
@@ -43,8 +55,15 @@
           Enabled
         </span>
       </label>
+      <label id="polyfillBlurControl" class="gallery-transition-control" hidden>
+        <span>Preview appearance</span>
+        <span class="gallery-checkbox">
+          <input id="polyfillBlurInput" type="checkbox" />
+          Blur preview
+        </span>
+      </label>
       <button id="reloadGalleryButton" class="gallery-action-button" type="button">
-        Reload preview
+        Replay loading
       </button>
     </section>
 

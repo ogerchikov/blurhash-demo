@@ -1,0 +1,212 @@
+{
+  "generatedAt": "2026-09-30T19:35:52.939Z",
+  "generatedBy": "generate-progressive-demo-assets",
+  "settings": {
+    "maxDimension": 960,
+    "jpegQuality": 82,
+    "avifenc": "1.4.2 --progressive",
+    "cjxl": "0.12.0 --progressive"
+  },
+  "images": [
+    {
+      "id": "beach",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/beach.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 81291
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/beach.png",
+        "mimeType": "image/png",
+        "bytes": 1408725
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/beach.avif",
+        "mimeType": "image/avif",
+        "bytes": 93325
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/beach.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 61890
+      }
+    },
+    {
+      "id": "city-skyline",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/city-skyline.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 95559
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/city-skyline.png",
+        "mimeType": "image/png",
+        "bytes": 1391989
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/city-skyline.avif",
+        "mimeType": "image/avif",
+        "bytes": 95447
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/city-skyline.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 76723
+      }
+    },
+    {
+      "id": "forest-trail",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/forest-trail.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 122008
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/forest-trail.png",
+        "mimeType": "image/png",
+        "bytes": 1361912
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/forest-trail.avif",
+        "mimeType": "image/avif",
+        "bytes": 141487
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/forest-trail.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 100878
+      }
+    },
+    {
+      "id": "mountains",
+      "width": 750,
+      "height": 509,
+      "progressiveJpeg": {
+        "src": "./progressive-images/mountains.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 17665
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/mountains.png",
+        "mimeType": "image/png",
+        "bytes": 194409
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/mountains.avif",
+        "mimeType": "image/avif",
+        "bytes": 14992
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/mountains.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 16043
+      }
+    },
+    {
+      "id": "night-mood",
+      "width": 640,
+      "height": 960,
+      "progressiveJpeg": {
+        "src": "./progressive-images/night-mood.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 98014
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/night-mood.png",
+        "mimeType": "image/png",
+        "bytes": 951577
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/night-mood.avif",
+        "mimeType": "image/avif",
+        "bytes": 122091
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/night-mood.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 83773
+      }
+    },
+    {
+      "id": "portrait-closeup",
+      "width": 640,
+      "height": 960,
+      "progressiveJpeg": {
+        "src": "./progressive-images/portrait-closeup.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 90288
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/portrait-closeup.png",
+        "mimeType": "image/png",
+        "bytes": 1284678
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/portrait-closeup.avif",
+        "mimeType": "image/avif",
+        "bytes": 98197
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/portrait-closeup.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 64371
+      }
+    },
+    {
+      "id": "product-closeup",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/product-closeup.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 84770
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/product-closeup.png",
+        "mimeType": "image/png",
+        "bytes": 1244814
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/product-closeup.avif",
+        "mimeType": "image/avif",
+        "bytes": 73431
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/product-closeup.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 68141
+      }
+    },
+    {
+      "id": "signage-text",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/signage-text.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 65156
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/signage-text.png",
+        "mimeType": "image/png",
+        "bytes": 1208704
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/signage-text.avif",
+        "mimeType": "image/avif",
+        "bytes": 61225
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/signage-text.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 53122
+      }
+    }
+  ]
+}

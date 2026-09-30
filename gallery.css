@@ -160,6 +160,38 @@
   display: block;
 }
 
+.blur-image-previews .image-preview-loading img {
+  filter: blur(16px);
+  transform: scale(1.04);
+}
+
+.blur-image-previews.image-preview-css-transition
+  .image-preview-revealing img {
+  transition:
+    filter 2s ease,
+    transform 2s ease;
+}
+
+.blur-image-previews .photo-card-frame[data-image-preview-transition-scope]::view-transition-old(*),
+.blur-image-previews .single-photo-frame[data-image-preview-transition-scope]::view-transition-old(*) {
+  animation-name:
+    image-preview-polyfill-fade-out,
+    image-preview-polyfill-mix-blend-mode-plus-lighter,
+    image-preview-app-unblur;
+}
+
+@keyframes image-preview-app-unblur {
+  from {
+    filter: blur(16px);
+    transform: scale(1.04);
+  }
+
+  to {
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
 .photo-card-frame img {
   object-fit: cover;
 }
