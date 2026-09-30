@@ -17,10 +17,8 @@ and a separate demo of the proposed native image-preview API.
 - `index.html`: Main comparison page with interactive cards and per-image rows table.
 - `app.js`: Runtime logic for placeholder generation, manifest loading, row selection, and benchmarks.
 - `base.css`: Shared page, typography, and utility-link styles.
-- `styles.css`: Main comparison and comparison-table styles.
+- `styles.css`: Main comparison styles.
 - `gallery.css`: Grid and single-image gallery styles.
-- `comparison-table.html`: Dedicated table page for comparing original and placeholders.
-- `comparison-table.js`: Data loading and placeholder rendering for the comparison table page.
 - `native-image-preview.html`: Native `previewsrc` / `HTMLImageElement.previewSrc` API demo.
 - `native-image-preview.js`: Demo setup, implementation status, and final-image reload behavior.
 - `single-image-preview.html`: Single-image gallery with previous and next controls.
@@ -35,8 +33,6 @@ and a separate demo of the proposed native image-preview API.
 - `scripts/run-benchmark.mjs`: Fresh-browser-context clean and visual benchmark runner.
 - `image-preview-demo-support.js`: Shared native detection and conditional polyfill loading.
 - `image-preview-polyfill.js`: Fallback implementation loaded only when the native API is unavailable.
-- `precompute.html`: Browser-only precompute tool page.
-- `precompute-browser.js`: Computes placeholder data in-browser and exports `photos.json`.
 - `photos.json`: Precomputed manifest consumed by the app.
 - `scripts/precompute-placeholders.mjs`: Node precompute script for generating `photos.json`.
 - `images/`: Source images used by the demo.
@@ -247,16 +243,13 @@ event.
 
 ## Precompute `photos.json`
 
-You can generate precomputed placeholder data in two ways.
+Run:
 
-### Option A: Browser Tool (recommended for this demo)
+```powershell
+npm run precompute
+```
 
-1. Open `precompute.html`
-2. Scan or manually list files in `images/`
-3. Generate manifest
-4. Download or copy output into `photos.json`
-
-Generated fields include:
+This writes `photos.json` from files in `images/`. Generated fields include:
 
 - `blurhash`
 - `thumbhashBase64`
@@ -265,16 +258,6 @@ Generated fields include:
 - `color` object (`r`, `g`, `b`, `hex`)
 - `shimmer` object (`mimeType`, `width`, `height`, `dataUrl`)
 - `bytes` metrics
-
-### Option B: Node Script
-
-Run:
-
-```powershell
-node ./scripts/precompute-placeholders.mjs
-```
-
-This writes `photos.json` from files in `images/`.
 
 ## Notes And Behavior
 
