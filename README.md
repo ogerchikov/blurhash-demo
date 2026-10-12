@@ -23,6 +23,9 @@ and a separate demo of the proposed native image-preview API.
 - `native-image-preview.js`: Demo setup, implementation status, and final-image reload behavior.
 - `single-image-preview.html`: Single-image gallery with previous and next controls.
 - `single-image-preview.js`: Single-image navigation and preview playback.
+- `bing-image-search.html`: Bing-inspired search results and image-detail preview demo.
+- `bing-image-search.js`: Search filtering, detail navigation, and thumbnail-to-original handoff.
+- `bing-image-search.css`: Responsive search results and detail-view styling.
 - `progressive-images/`: Checked-in progressive JPEG, PNG, AVIF, and JPEG XL gallery assets.
 - `scripts/generate-progressive-demo-assets.mjs`: Regenerates the static progressive gallery assets.
 - `scripts/setup-image-encoders.mjs`: Installs verified project-local AVIF and JPEG XL encoders.
@@ -36,6 +39,7 @@ and a separate demo of the proposed native image-preview API.
 - `photos.json`: Precomputed manifest consumed by the app.
 - `scripts/precompute-placeholders.mjs`: Node precompute script for generating `photos.json`.
 - `images/`: Source images used by the demo.
+- `scripts/generate-large-demo-images.mjs`: Regenerates three recognizable 6000x4000, ~10 MiB JPEG stress-test images.
 
 ## What The Main Page Shows
 
@@ -97,6 +101,14 @@ python -m http.server 8080
 ```
 
 Then navigate to the local URL shown by your server.
+
+### Bing-style Image Search Demo
+
+Open `bing-image-search.html` for a search-results experience modeled after Bing Images. Selecting
+a result opens an image detail surface where the exact 960px search thumbnail becomes the
+`previewsrc` for the original image. A configurable delay makes the preview-to-final transition
+easy to inspect on a local connection. Use **Replay** to repeat the handoff, arrow keys or the
+on-screen controls to browse results, and Escape to return to the results grid.
 
 ### Native Image Preview Gallery
 
@@ -246,10 +258,12 @@ event.
 Run:
 
 ```powershell
+npm run demo:generate-large-images
 npm run precompute
 ```
 
-This writes `photos.json` from files in `images/`. Generated fields include:
+The first command reproducibly generates the large stress-test source images. The second writes
+`photos.json` from files in `images/`. Generated fields include:
 
 - `blurhash`
 - `thumbhashBase64`

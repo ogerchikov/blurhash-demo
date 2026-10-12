@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "precompute": "node ./scripts/precompute-placeholders.mjs",
+    "demo:generate-large-images": "node ./scripts/generate-large-demo-images.mjs",
     "tools:setup-image-encoders": "node ./scripts/setup-image-encoders.mjs",
     "demo:generate-progressive": "node ./scripts/generate-progressive-demo-assets.mjs",
     "benchmark:generate": "node ./scripts/generate-benchmark-assets.mjs",

@@ -24,6 +24,8 @@ const LQIP_MAX_DIMENSION = 32;
 const LQIP_JPEG_QUALITY = 45;
 const INLINE_AVIF_QUALITY = 45;
 const THUMBHASH_MAX_DIMENSION = 100;
+const BLURHASH_MAX_DIMENSION = 256;
+const BLURHASH_RESIZE_THRESHOLD = 3000;
 
 function isSupportedImage(fileName) {
   return SUPPORTED_EXTENSIONS.has(path.extname(fileName).toLowerCase());
@@ -105,8 +107,19 @@ function makeShimmerDataUrl(width, height, baseHex, animate = true) {
 
 async function computePlaceholdersForImage(fileName) {
   const filePath = path.join(imagesDir, fileName);
-  const image = sharp(filePath).ensureAlpha();
-  const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
+  const metadata = await sharp(filePath).metadata();
+  const blurhashSource =
+    Math.max(metadata.width, metadata.height) > BLURHASH_RESIZE_THRESHOLD
+      ? sharp(filePath).resize({
+          width: BLURHASH_MAX_DIMENSION,
+          height: BLURHASH_MAX_DIMENSION,
+          fit: "inside",
+        })
+      : sharp(filePath);
+  const { data, info } = await blurhashSource
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
   const rgba = new Uint8ClampedArray(data.buffer, data.byteOffset, data.byteLength);
   const { xComponents, yComponents } = computeBlurhashComponents(info.width, info.height);
@@ -158,8 +171,8 @@ async function computePlaceholdersForImage(fileName) {
   return {
     id: path.parse(fileName).name,
     src: `./images/${fileName}`,
-    width: info.width,
-    height: info.height,
+    width: metadata.width,
+    height: metadata.height,
     blurhash,
     thumbhashBase64,
     lqip: {

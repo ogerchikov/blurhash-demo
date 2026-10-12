@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Preview in Search</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./bing-image-search.css" />
+</head>
+<body>
+  <header class="search-header">
+    <div class="search-header__top">
+      <a class="brand" href="./index.html" aria-label="Back to image preview demos">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span>Microsoft Bing</span>
+      </a>
+      <form id="searchForm" class="search-box" role="search">
+        <label class="sr-only" for="searchInput">Search images</label>
+        <input id="searchInput" type="search" value="beautiful places" autocomplete="off" />
+        <button type="submit" aria-label="Search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m20 20-4.6-4.6m2.1-5.15a7.25 7.25 0 1 1-14.5 0 7.25 7.25 0 0 1 14.5 0Z" />
+          </svg>
+        </button>
+      </form>
+      <nav class="header-actions" aria-label="Account">
+        <button type="button">Rewards</button>
+        <button class="account-button" type="button" aria-label="Account">OG</button>
+      </nav>
+    </div>
+    <nav class="search-tabs" aria-label="Search categories">
+      <a href="#">Copilot</a>
+      <a href="#">Web</a>
+      <a class="is-active" href="#" aria-current="page">Images</a>
+      <a href="#">Videos</a>
+      <a href="#">Maps</a>
+      <a href="#">News</a>
+      <a href="#">More</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="suggestion-strip" aria-label="Related searches">
+      <button type="button">Nature</button>
+      <button type="button">Wallpaper</button>
+      <button type="button">Travel</button>
+      <button type="button">Mountains</button>
+      <button type="button">Ocean</button>
+      <button type="button">City</button>
+      <button type="button">Forest</button>
+      <button type="button">Photography</button>
+    </section>
+
+    <div class="results-heading">
+      <p id="resultsLabel">Image results for <strong>beautiful places</strong></p>
+      <button id="filterButton" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h10M18 7h2M4 17h2m4 0h10M14 4v6M10 14v6" />
+        </svg>
+        Filter
+      </button>
+    </div>
+
+    <section id="imageResults" class="image-results" aria-label="Image search results" aria-busy="true">
+      <p class="loading-message">Loading image results...</p>
+    </section>
+  </main>
+
+  <section id="detailViewer" class="detail-viewer" hidden aria-label="Selected image detail">
+    <div class="detail-viewer__backdrop"></div>
+    <div class="detail-panel">
+      <header class="detail-toolbar">
+        <button id="closeDetailButton" class="icon-button" type="button" aria-label="Close image detail">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+        <div class="detail-toolbar__spacer"></div>
+        <label class="delay-control">
+          Final image delay
+          <select id="loadDelaySelect">
+            <option value="0">No delay</option>
+            <option value="800">0.8 seconds</option>
+            <option value="1600" selected>1.6 seconds</option>
+            <option value="3000">3 seconds</option>
+          </select>
+        </label>
+        <output id="implementationBadge" class="implementation-badge">Detecting preview API...</output>
+        <button id="replayButton" class="toolbar-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 4v6h6M5.5 9a8 8 0 1 1-1 6" />
+          </svg>
+          Replay
+        </button>
+      </header>
+
+      <div class="detail-content">
+        <div id="detailStage" class="detail-stage" aria-busy="true">
+          <button id="previousButton" class="stage-navigation stage-navigation--previous" type="button" aria-label="Previous image">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+          </button>
+          <div id="detailImageFrame" class="detail-image-frame">
+            <img id="detailImage" alt="" decoding="async" />
+            <span id="loadingIndicator" class="loading-indicator">Loading full resolution...</span>
+          </div>
+          <button id="nextButton" class="stage-navigation stage-navigation--next" type="button" aria-label="Next image">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+          </button>
+        </div>
+
+        <aside class="detail-info">
+          <div class="source-row">
+            <span class="source-icon" aria-hidden="true">I</span>
+            <div>
+              <strong>Image preview demo</strong>
+              <span>Local image result</span>
+            </div>
+            <button type="button">Visit</button>
+          </div>
+          <h1 id="detailTitle">Loading image...</h1>
+          <p id="detailMeta" class="detail-meta"></p>
+          <div class="preview-explainer">
+            <span class="preview-explainer__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 7v5m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+            </span>
+            <div>
+              <strong>Preview-to-final handoff</strong>
+              <p>The selected search thumbnail is displayed immediately through <code>previewsrc</code>. It is replaced when the original image finishes loading.</p>
+            </div>
+          </div>
+          <h2>Related images</h2>
+          <div id="relatedImages" class="related-images"></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="./bing-image-search.js"></script>
+</body>
+</html>

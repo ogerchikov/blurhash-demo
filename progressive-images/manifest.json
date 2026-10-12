@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T19:35:52.939Z",
+  "generatedAt": "2026-10-07T23:03:22.699Z",
   "generatedBy": "generate-progressive-demo-assets",
   "settings": {
     "maxDimension": 960,
@@ -81,6 +81,81 @@
         "src": "./progressive-images/forest-trail.jxl",
         "mimeType": "image/jxl",
         "bytes": 100878
+      }
+    },
+    {
+      "id": "large-alpine-express",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/large-alpine-express.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 44473
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/large-alpine-express.png",
+        "mimeType": "image/png",
+        "bytes": 887200
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/large-alpine-express.avif",
+        "mimeType": "image/avif",
+        "bytes": 29050
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/large-alpine-express.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 39676
+      }
+    },
+    {
+      "id": "large-coral-reef",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/large-coral-reef.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 42363
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/large-coral-reef.png",
+        "mimeType": "image/png",
+        "bytes": 902880
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/large-coral-reef.avif",
+        "mimeType": "image/avif",
+        "bytes": 32252
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/large-coral-reef.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 40079
+      }
+    },
+    {
+      "id": "large-orbital-observatory",
+      "width": 960,
+      "height": 640,
+      "progressiveJpeg": {
+        "src": "./progressive-images/large-orbital-observatory.jpg",
+        "mimeType": "image/jpeg",
+        "bytes": 31377
+      },
+      "interlacedPng": {
+        "src": "./progressive-images/large-orbital-observatory.png",
+        "mimeType": "image/png",
+        "bytes": 869658
+      },
+      "progressiveAvif": {
+        "src": "./progressive-images/large-orbital-observatory.avif",
+        "mimeType": "image/avif",
+        "bytes": 22924
+      },
+      "progressiveJxl": {
+        "src": "./progressive-images/large-orbital-observatory.jxl",
+        "mimeType": "image/jxl",
+        "bytes": 27160
       }
     },
     {

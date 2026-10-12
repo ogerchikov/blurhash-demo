@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T19:08:23.976Z",
+  "generatedAt": "2026-10-06T03:36:03.324Z",
   "generatedBy": "node-precompute",
   "images": [
     {
@@ -129,6 +129,138 @@
         "lqipDataUrlChars": 575,
         "avifBytes": 473,
         "avifDataUrlChars": 655,
+        "colorHexChars": 7,
+        "shimmerBytes": 703,
+        "shimmerDataUrlChars": 1263
+      }
+    },
+    {
+      "id": "large-alpine-express",
+      "src": "./images/large-alpine-express.jpg",
+      "width": 6000,
+      "height": 4000,
+      "blurhash": "L,HWAVRkS4j[uPa#oJayI:ofs:f6",
+      "thumbhashBase64": "pscRLYh3iIh/eIeFeGd4d2dwdwVI",
+      "lqip": {
+        "mimeType": "image/jpeg",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/jpeg;base64,/9j/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAVACADASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAMFBAL/xAAiEAACAgIBBAMBAAAAAAAAAAABAgADBBExBRJBYQYTIVH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAQMCBP/EAB0RAAIBBAMAAAAAAAAAAAAAAAABMQIDERITIVH/2gAMAwEAAhEDEQA/ALbhUYKx0TxGLihgSz9v89yFk9VrsuLEn1rxNRybb1QkkAcCVdxenPTZzBRGMQ3JjLa1OgF1rmYWzbjVrg+WmVPkH03Gq8BgPzfmLkTcg7LpXZEvyRW+kqQe4o515bu7yIQkDezUHQ6lka0W2IynJVzp6UPuEIYSHs3LP//Z"
+      },
+      "avif": {
+        "mimeType": "image/avif",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAAA5waXRtAAAAAAABAAAAImlsb2MAAAAAREAAAQABAAAAAAD6AAEAAAAAAAAA/QAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgSACAAAAABRpc3BlAAAAAAAAACAAAAAVAAAAEHBpeGkAAAAAAwgICAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAAEFbWRhdBIACgg4ET9GEBDQaTLuARjAEknDhQDPx0doxB1TzbupEBwzMdc35W78wQzMeSFQvT7t01+OUVF0pdPvt7Ozd+4VWZgDhRpp4ojwZi1BCut3lwGjkyr8agwjlG6kO3pYMzMz1IzWzMf/EjBN6ToFnE8ry/2gQfDHNwEwhTz3x7ASiH9VdTHu80wvGvDRPXWSpPaUmwdVAueb7WGa1rZfOHa7i0ptYJ+JYc2rOiNVzga6KaL/J5nFIP9uWNeoJS21Kk5oiROCsLp6mK+pPYvrUQAYKoYTEQFU852xSH7FP+nN220mzLcPeW8wkcyayni/DsONpEkOMEWf2WysaD8="
+      },
+      "color": {
+        "r": 134,
+        "g": 164,
+        "b": 164,
+        "hex": "#86a4a4"
+      },
+      "shimmer": {
+        "mimeType": "image/svg+xml",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2021%22%20preserveAspectRatio%3D%22none%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientUnits%3D%22userSpaceOnUse%22%20x1%3D%22-64%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%220%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2386a4a4%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2244%25%22%20stop-color%3D%22%2390abab%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%2399b3b3%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2256%25%22%20stop-color%3D%22%2390abab%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2386a4a4%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x1%22%20values%3D%22-64%3B64%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x2%22%20values%3D%220%3B128%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2221%22%20fill%3D%22url(%23g)%22%20%2F%3E%0A%3C%2Fsvg%3E"
+      },
+      "bytes": {
+        "blurhashChars": 28,
+        "thumbhashBytes": 21,
+        "thumbhashBase64Chars": 28,
+        "lqipBytes": 417,
+        "lqipDataUrlChars": 579,
+        "avifBytes": 503,
+        "avifDataUrlChars": 695,
+        "colorHexChars": 7,
+        "shimmerBytes": 703,
+        "shimmerDataUrlChars": 1263
+      }
+    },
+    {
+      "id": "large-coral-reef",
+      "src": "./images/large-coral-reef.jpg",
+      "width": 6000,
+      "height": 4000,
+      "blurhash": "LWFP$wflJDWr2_s+J.Ne~RnPV]ba",
+      "thumbhashBase64": "HYcJPZJ4h3eGd4d/hzmHiliAjQao",
+      "lqip": {
+        "mimeType": "image/jpeg",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/jpeg;base64,/9j/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAVACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMCBAUG/8QAIRAAAgICAgMAAwAAAAAAAAAAAQIAAwQRIUESMWEFIiP/xAAYAQACAwAAAAAAAAAAAAAAAAACBQABBP/EAB0RAAICAgMBAAAAAAAAAAAAAAECABEDEiExMmH/2gAMAwEAAhEDEQA/AEpd+w5lxRU3JcEnqZlWUlVX9KPLfZiGuJ0RxvqaMil+jUW4lXH6S5qZFiVsAjBooX8kyijOzgaO/sZY1h2Au9e/ES1OoAJuC2ENbAV8nRPh0OpVq1IPyQxfx2NUwYVgn7CETbtqRcfFQeSI/Iw6LVDFACPREhTjVUoVRRz733CEBWNVclCf/9k="
+      },
+      "avif": {
+        "mimeType": "image/avif",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAAA5waXRtAAAAAAABAAAAImlsb2MAAAAAREAAAQABAAAAAAD6AAEAAAAAAAABDwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgSACAAAAABRpc3BlAAAAAAAAACAAAAAVAAAAEHBpeGkAAAAAAwgICAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAAEXbWRhdBIACgg4ET9GEBDQaTKAAhjAAQTWBQDRGbDrUw0AQWf1BuePcpIvihEqgyrJ2r/C1xnRjEmgVjiOwZ7+0/CCq+n+BGTQaEiRVE0Wxa0VHq6LLat5pwTmU2Mv8+5hx2WNDKwTDPXxNbWec/213DEQRfxcfZXzg3ydmEd9U9q0OHDj2cP1svIv5BUaHDuAxp60eGCyqjwl5xXNvtRn/N2XCZ2BDe9z7F23Tn80BREtVR20aSPqGy0wu+ZttQXjSsCM/Ps95TqF9yjid92wOxitNjvhNTr5c8VV/wLfQYtwaY6MtU2PA/57A2jku+OpiIJQXBq4WC61OcnQcGYpd4C5xjJzEaNd3NqX8ghYMIYU4IA="
+      },
+      "color": {
+        "r": 79,
+        "g": 141,
+        "b": 136,
+        "hex": "#4f8d88"
+      },
+      "shimmer": {
+        "mimeType": "image/svg+xml",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2021%22%20preserveAspectRatio%3D%22none%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientUnits%3D%22userSpaceOnUse%22%20x1%3D%22-64%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%220%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234f8d88%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2244%25%22%20stop-color%3D%22%235d9692%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%236b9f9b%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2256%25%22%20stop-color%3D%22%235d9692%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%234f8d88%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x1%22%20values%3D%22-64%3B64%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x2%22%20values%3D%220%3B128%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2221%22%20fill%3D%22url(%23g)%22%20%2F%3E%0A%3C%2Fsvg%3E"
+      },
+      "bytes": {
+        "blurhashChars": 28,
+        "thumbhashBytes": 21,
+        "thumbhashBase64Chars": 28,
+        "lqipBytes": 428,
+        "lqipDataUrlChars": 595,
+        "avifBytes": 521,
+        "avifDataUrlChars": 719,
+        "colorHexChars": 7,
+        "shimmerBytes": 703,
+        "shimmerDataUrlChars": 1263
+      }
+    },
+    {
+      "id": "large-orbital-observatory",
+      "src": "./images/large-orbital-observatory.jpg",
+      "width": 6000,
+      "height": 4000,
+      "blurhash": "L58EA69t00=xD4E+~qrWQkE2xu?b",
+      "thumbhashBase64": "DfcFFYIVeYpjfKNgqNhXonZoX+ry",
+      "lqip": {
+        "mimeType": "image/jpeg",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/jpeg;base64,/9j/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAVACADASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABAAFAwb/xAAjEAABBAAGAgMAAAAAAAAAAAABAAIDBAUREiExURNhFCNB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAECBP/EABgRAQEAAwAAAAAAAAAAAAAAAAARARIh/9oADAMBAAIRAxEAPwDyHjV4/SToAPIWoyKPE4Wxta1llo2I4cFomEdZVGKE2GmwfrB3Ha6YiyqZT8YZDpIfhU8erU0AN5OfCNJE2Mga2nPpLXFtPfkEBzO+6TSsPr2mviJaR7UpQCLWI2LFZzZX5gu3/M1mnnZSkB//2Q=="
+      },
+      "avif": {
+        "mimeType": "image/avif",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAAA5waXRtAAAAAAABAAAAImlsb2MAAAAAREAAAQABAAAAAAD6AAEAAAAAAAAAwwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgSACAAAAABRpc3BlAAAAAAAAACAAAAAVAAAAEHBpeGkAAAAAAwgICAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAADLbWRhdBIACgg4ET9GEBDQaTK0ARjADTSlBQDPp6vSKHa3Fy+SkRFLadjhWL61avmMqR5TO/n6AVc98l8bYsKjPutG7D8f7oAwWeBNjkuOmhRtUUQfy9nG9Ut9Olob7VAU/4rvJn8aW0xLVySVGF7XlB88JN7LQv72Yx5yUM08rDd9Wy77IfqKCw+6J3eeMkZteAxBSDTDhjL/RLtsAIMQjBSgExxax7R4B81OfGxBKxl2nmoQ58LuZ/4UFR6rQQE9tg7+A9eSsA=="
+      },
+      "color": {
+        "r": 38,
+        "g": 45,
+        "b": 74,
+        "hex": "#262d4a"
+      },
+      "shimmer": {
+        "mimeType": "image/svg+xml",
+        "width": 32,
+        "height": 21,
+        "dataUrl": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2021%22%20preserveAspectRatio%3D%22none%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientUnits%3D%22userSpaceOnUse%22%20x1%3D%22-64%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%220%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23262d4a%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2244%25%22%20stop-color%3D%22%23373e58%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23494f67%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2256%25%22%20stop-color%3D%22%23373e58%22%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23262d4a%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x1%22%20values%3D%22-64%3B64%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D%22x2%22%20values%3D%220%3B128%22%20dur%3D%221.8s%22%20repeatCount%3D%22indefinite%22%20%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2221%22%20fill%3D%22url(%23g)%22%20%2F%3E%0A%3C%2Fsvg%3E"
+      },
+      "bytes": {
+        "blurhashChars": 28,
+        "thumbhashBytes": 21,
+        "thumbhashBase64Chars": 28,
+        "lqipBytes": 397,
+        "lqipDataUrlChars": 555,
+        "avifBytes": 445,
+        "avifDataUrlChars": 619,
         "colorHexChars": 7,
         "shimmerBytes": 703,
         "shimmerDataUrlChars": 1263
