@@ -105,10 +105,16 @@ Then navigate to the local URL shown by your server.
 ### Bing-style Image Search Demo
 
 Open `bing-image-search.html` for a search-results experience modeled after Bing Images. Selecting
-a result opens an image detail surface where the exact 960px search thumbnail becomes the
-`previewsrc` for the original image. A configurable delay makes the preview-to-final transition
-easy to inspect on a local connection. Use **Replay** to repeat the handoff, arrow keys or the
-on-screen controls to browse results, and Escape to return to the results grid.
+a result opens an image detail surface with three selectable views. **Current Bing** displays the
+image's dominant color until the original loads. **Proposed** supplies the image's BlurHash through
+`Image.previewSrc`, using the native API or its polyfill, and replaces it with the original image.
+A third view supplies the exact low-resolution thumbnail clicked on the results page through
+`Image.previewSrc`. A configurable delay makes all loading states easy to inspect locally. Use
+**Replay** to repeat the handoff, arrow keys or the on-screen controls to browse results, and Escape
+to return to the results grid. The results grid also switches between dominant-color loading and
+BlurHash through `Image.previewSrc`; **Animate preview handoff** enables or disables transitions
+for both the landing page and detail viewer. **Replay loading** repeats the selected landing-page
+strategy with fresh thumbnail requests.
 
 ### Native Image Preview Gallery
 

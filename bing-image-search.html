@@ -51,6 +51,26 @@
       <button type="button">Photography</button>
     </section>
 
+    <section class="landing-loading-controls" aria-label="Landing page image loading">
+      <label>
+        Result image loading
+        <select id="landingModeSelect">
+          <option value="current" selected>Current Bing: dominant color</option>
+          <option value="proposed">Proposed: previewSrc + BlurHash</option>
+        </select>
+      </label>
+      <label class="landing-transition-control">
+        <input id="animatedTransitionsInput" type="checkbox" checked />
+        Animate preview handoff
+      </label>
+      <button id="replayResultsButton" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 4v6h6M5.5 9a8 8 0 1 1-1 6" />
+        </svg>
+        Replay loading
+      </button>
+    </section>
+
     <div class="results-heading">
       <p id="resultsLabel">Image results for <strong>beautiful places</strong></p>
       <button id="filterButton" type="button">
@@ -76,7 +96,15 @@
           </svg>
         </button>
         <div class="detail-toolbar__spacer"></div>
-        <label class="delay-control">
+        <label class="toolbar-select-control">
+          View
+          <select id="previewModeSelect">
+            <option value="current" selected>Current Bing: dominant color</option>
+            <option value="proposed">Proposed: previewSrc + BlurHash</option>
+            <option value="thumbnail">Proposed: previewSrc + clicked thumbnail</option>
+          </select>
+        </label>
+        <label class="toolbar-select-control delay-control">
           Final image delay
           <select id="loadDelaySelect">
             <option value="0">No delay</option>
@@ -99,8 +127,10 @@
           <button id="previousButton" class="stage-navigation stage-navigation--previous" type="button" aria-label="Previous image">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
           </button>
-          <div id="detailImageFrame" class="detail-image-frame">
+          <div id="detailImageFrame" class="detail-image-frame" data-image-preview-transition="app">
             <img id="detailImage" alt="" decoding="async" />
+            <img id="detailFinalOverlay" class="detail-final-overlay" alt="" hidden />
+            <span id="detailPreviewOverlay" class="detail-preview-overlay" aria-hidden="true"></span>
             <span id="loadingIndicator" class="loading-indicator">Loading full resolution...</span>
           </div>
           <button id="nextButton" class="stage-navigation stage-navigation--next" type="button" aria-label="Next image">
@@ -124,8 +154,8 @@
               <svg viewBox="0 0 24 24"><path d="M12 7v5m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
             </span>
             <div>
-              <strong>Preview-to-final handoff</strong>
-              <p>The selected search thumbnail is displayed immediately through <code>previewsrc</code>. It is replaced when the original image finishes loading.</p>
+              <strong id="previewExplainerTitle">Dominant-color placeholder</strong>
+              <p id="previewExplainerBody">The current view fills the image area with its dominant color until the original image finishes loading.</p>
             </div>
           </div>
           <h2>Related images</h2>

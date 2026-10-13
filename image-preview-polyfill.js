@@ -210,7 +210,11 @@
 
   function getTransitionScope(image) {
     const scope = image.parentElement;
-    if (!scope || typeof scope.startViewTransition !== "function") {
+    if (
+      !scope
+      || scope.hasAttribute("data-image-preview-transition")
+      || typeof scope.startViewTransition !== "function"
+    ) {
       return null;
     }
 
